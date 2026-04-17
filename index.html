@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zania — Evidence Collection · Twilio</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:#070B13;color:#E8EDF8;
+  display:flex;flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+:root{
+  /* ── BASE ── */
+  --bg:#070B13;--surface:#0B0F1E;--panel:#0D1120;--card:#111827;--card-h:#151e30;
+  --border:#1c2539;--border-s:#111827;
+  --t1:#E8EDF8;--t2:#7E8EB0;--t3:#6C7D9E;--t4:#1E2D48;
+  --focus-ring:#4ADE80;
+
+  /* ── SEMANTIC COLOR TOKENS (3 colors, each owns one meaning) ──
+     pos   = brand identity · complete status · primary action
+     ctn   = needs analyst attention · decision pending · incomplete
+     crit  = hard blocked · critical risk threshold exceeded         */
+  --pos:#4ADE80;  --pos-bg:rgba(74,222,128,.07);  --pos-border:rgba(74,222,128,.15);
+  --ctn:#F59E0B;  --ctn-bg:rgba(245,158,11,.07);  --ctn-border:rgba(245,158,11,.15);
+  --crit:#EF4444; --crit-bg:rgba(239,68,68,.06);  --crit-border:rgba(239,68,68,.14);
+  /* neutral-accent = workflow states with no urgency (sent · waiting · in-progress) */
+  --neutral:#7E8EB0;--neutral-bg:rgba(126,142,176,.07);--neutral-border:rgba(126,142,176,.16);
+
+  /* ── BACKWARD-COMPAT ALIASES (keep all existing usages working) ── */
+  --brand:var(--pos);--brand-dim:var(--pos-bg);--brand-ring:var(--pos-border);
+  --green:var(--pos);--green-d:var(--pos-bg);--green-r:var(--pos-border);
+  --amber:var(--ctn);--amber-d:var(--ctn-bg);--amber-r:var(--ctn-border);
+  --red:var(--crit);--red-d:var(--crit-bg);--red-r:var(--crit-border);
+  /* retired accent colors — remapped to neutral so sent/waiting/in-progress states
+     lose their chromatic noise without any individual class changes */
+  --blue:var(--neutral);--blue-d:var(--neutral-bg);--blue-r:var(--neutral-border);
+  --indigo:var(--neutral);--indigo-d:var(--neutral-bg);--indigo-r:var(--neutral-border);
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:44px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px 0 68px;gap:10px;
+  flex-shrink:0;z-index:100;
+}
+.vdiv{width:1px;height:16px;background:var(--border);flex-shrink:0}
+.bc{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3)}
+.bc .sep{color:var(--t3)}.bc .cur{color:var(--t2)}.bc .act{color:var(--t1);font-weight:500}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.ai-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--green-d);border:1px solid var(--green-r);
+  border-radius:20px;padding:4px 10px 4px 8px;
+  font-size:11px;font-weight:500;color:var(--brand);
+  font-family:'IBM Plex Mono',monospace;
+}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--brand);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.round-pill{
+  font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;
+  background:var(--indigo-d);border:1px solid var(--indigo-r);color:var(--indigo);
+  font-family:'IBM Plex Mono',monospace;
+}
+.avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,#4ADE80,#22C55E);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#000;font-family:'IBM Plex Mono',monospace;
+}
+
+/* ── BODY ── */
+.body{display:flex;flex:1;overflow:hidden;position:relative;padding-left:56px}
+
+/* ── PRIMARY NAV (Zania app nav) — overlay expand ── */
+.primary-nav{
+  position:fixed;left:0;top:0;bottom:0;
+  width:56px;
+  background:#070B13;
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:10px 0;
+  z-index:201;
+  overflow:hidden;
+  transition:width .22s cubic-bezier(.4,0,.2,1), box-shadow .22s;
+}
+.primary-nav:hover{
+  width:196px;
+  box-shadow:4px 0 28px rgba(0,0,0,.6);
+  border-right-color:var(--border);
+}
+.nav-logo-wrap{
+  display:flex;align-items:center;height:38px;
+  padding:0 0 0 2px;margin-bottom:8px;overflow:hidden;
+}
+.nav-logo{
+  width:52px;height:38px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.nav-logo-mark{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--green-d);border:1px solid var(--green-r);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--brand);
+  font-family:'IBM Plex Mono',monospace;
+}
+.nav-logo-text{
+  font-size:14px;font-weight:700;color:#fff;letter-spacing:-.3px;
+  opacity:0;transform:translateX(-6px);
+  transition:opacity .15s .04s,transform .15s .04s;
+  white-space:nowrap;padding-left:8px;
+}
+.nav-logo-text em{color:var(--brand);font-style:normal}
+.primary-nav:hover .nav-logo-text{opacity:1;transform:translateX(0)}
+
+.nav-item{
+  display:flex;align-items:center;height:38px;
+  cursor:pointer;border-left:2px solid transparent;
+  transition:background .12s,color .12s;color:var(--t3);
+  padding-left:2px;
+}
+.nav-item:hover{background:var(--panel);color:var(--t2)}
+.nav-item.active{background:var(--panel);color:var(--t1);border-left-color:var(--brand)}
+.nav-icon-wrap{
+  width:52px;height:38px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.nav-icon-wrap svg{width:16px;height:16px;flex-shrink:0}
+.nav-label{
+  font-size:12.5px;font-weight:500;color:inherit;
+  opacity:0;transform:translateX(-6px);
+  transition:opacity .15s .04s,transform .15s .04s;
+  white-space:nowrap;
+}
+.primary-nav:hover .nav-label{opacity:1;transform:translateX(0)}
+
+.nav-spacer{flex:1}
+.nav-divider{
+  width:32px;height:1px;background:var(--border);
+  margin:4px 0 4px 12px;
+  transition:width .22s;
+}
+.primary-nav:hover .nav-divider{width:calc(100% - 24px)}
+
+/* ── PHASE NAV ── */
+.phase-nav{
+  width:240px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;
+}
+.nav-section-label{
+  padding:12px 14px 8px;font-size:9.5px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--t3);
+  border-bottom:1px solid var(--border-s);flex-shrink:0;
+}
+.nav-group-label{
+  padding:8px 14px 4px;font-size:8.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--t4);
+  flex-shrink:0;
+}
+.vendor-card{padding:10px 14px 12px;border-bottom:1px solid var(--border-s);flex-shrink:0}
+.vendor-name{font-size:14px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:6px}
+.tier{
+  font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;
+  background:var(--red-d);border:1px solid var(--red-r);color:var(--red);
+  font-family:'IBM Plex Mono',monospace;
+}
+.vendor-meta{font-size:12px;color:var(--t3);margin-top:2px}
+
+/* Stats */
+.nav-stats{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1px;background:var(--border-s);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.stat-cell{background:var(--surface);padding:11px 13px;cursor:pointer;transition:background .12s}
+.stat-cell:hover{background:var(--panel)}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:var(--t1);line-height:1}
+.stat-val.green{color:var(--brand)}.stat-val.amber{color:var(--amber)}.stat-val.blue{color:var(--blue)}
+.stat-key{font-size:10.5px;font-weight:500;color:var(--t3);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+
+/* Phase list */
+.phase-list{flex:1;padding:6px 0;overflow-y:auto}
+.phase-item{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:10px 14px;cursor:pointer;
+  transition:background .1s;border-left:2px solid transparent;
+}
+.phase-item:hover{background:var(--panel)}
+.phase-item.active{background:var(--panel);border-left-color:var(--brand)}
+.phase-item.active .pname{color:var(--t1)}
+.pstep{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.pstep.done{background:var(--green-d);border:1px solid var(--green-r);color:var(--brand)}
+.pstep.warn{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.pstep.bad{background:var(--red-d);border:1px solid var(--red-r);color:var(--red)}
+.pstep.wait{background:var(--blue-d);border:1px solid var(--blue-r);color:var(--blue)}
+.pstep.prog{background:var(--indigo-d);border:1px solid var(--indigo-r);color:var(--indigo)}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:13px;font-weight:500;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psub{font-size:11.5px;color:var(--t3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psub.green{color:var(--brand)}.psub.amber{color:var(--amber)}.psub.red{color:var(--red)}
+.psub.blue{color:var(--blue)}.psub.indigo{color:var(--indigo)}
+
+/* AI activity log */
+.ai-log{border-top:1px solid var(--border);padding:10px 14px;background:var(--panel);flex-shrink:0}
+.ai-log-hd{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:7px}
+.ai-entry .ts{color:var(--t3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* Phase header */
+.ph{padding:20px 28px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.ph-row{display:flex;align-items:center;gap:10px}
+.ph-title{font-size:16px;font-weight:600;color:var(--t1)}
+.ph-desc{font-size:13px;color:var(--t3);margin-top:4px}
+.ph-meta{display:flex;align-items:center;gap:16px;margin-top:12px}
+.ph-meta-item{font-size:12px;color:var(--t2)}
+.ph-meta-item strong{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--t1)}
+
+/* Badges */
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+.badge.incomplete{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.badge.complete{background:var(--green-d);border:1px solid var(--green-r);color:var(--brand)}
+.badge.sent{background:var(--blue-d);border:1px solid var(--blue-r);color:var(--blue)}
+.badge.review{background:var(--red-d);border:1px solid var(--red-r);color:var(--red)}
+.badge.clear{background:var(--green-d);border:1px solid var(--green-r);color:var(--brand)}
+.badge.doc{background:var(--blue-d);border:1px solid var(--blue-r);color:var(--blue)}
+.badge.q{background:var(--indigo-d);border:1px solid var(--indigo-r);color:var(--indigo)}
+.badge.draft{background:var(--neutral-bg);border:1px solid var(--neutral-border);color:var(--neutral)}
+
+/* Scrollable content */
+.pc{flex:1;overflow-y:auto;padding:24px 28px}
+
+/* Section label */
+.slabel{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border-s)}
+
+/* ── DOC ROWS ── */
+.doc-list{display:flex;flex-direction:column;gap:5px}
+.doc-row{
+  display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+  background:var(--card);border:1px solid var(--border-s);border-radius:6px;
+  cursor:pointer;transition:all .15s;
+}
+.doc-row:hover{background:var(--card-h);border-color:var(--border)}
+/* bl-* left borders removed — colored dot + status text carry the signal */
+.dot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.dot.green{background:var(--green)}.dot.amber{background:var(--amber)}
+.dot.red{background:var(--red)}.dot.blue{background:var(--blue)}.dot.gray{background:var(--t3)}
+.db{flex:1;min-width:0}
+.dname{font-size:13.5px;font-weight:500;color:var(--t1);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dsub{font-size:12px;color:var(--t3);margin-top:3px}
+.dr{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.dstatus{font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.dstatus.green{color:var(--brand)}.dstatus.amber{color:var(--amber)}.dstatus.red{color:var(--red)}
+
+.chip{display:inline-flex;font-size:9.5px;font-weight:500;padding:1px 6px;border-radius:3px;background:var(--panel);border:1px solid var(--border);color:var(--t3);font-family:'IBM Plex Mono',monospace}
+.nda-tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:var(--red-d);border:1px solid var(--red-r);color:var(--red);font-family:'IBM Plex Mono',monospace}
+.hist-tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber);font-family:'IBM Plex Mono',monospace}
+
+/* Expandable */
+.expand{overflow:hidden;max-height:0;opacity:0;transition:max-height .28s ease,opacity .2s}
+.expand.open{max-height:500px;opacity:1}
+.expand-inner{margin-top:10px;padding-top:10px;border-top:1px solid var(--border-s)}
+
+/* Step instructions */
+.steps-title{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:8px}
+.step-row{display:flex;gap:9px;margin-bottom:5px}
+.step-n{width:16px;height:16px;border-radius:50%;background:var(--panel);border:1px solid var(--border);color:var(--t3);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'IBM Plex Mono',monospace}
+.step-t{font-size:12.5px;color:var(--t2);line-height:1.6}
+.step-link{color:var(--brand);text-decoration:none}
+
+/* Buttons */
+.btn-row{display:flex;gap:8px;margin-top:10px}
+.btn-p{flex:1;padding:7px 12px;background:var(--brand-dim);border:1px solid var(--brand-ring);color:var(--brand);font-size:11.5px;font-weight:600;border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-p:hover{background:rgba(74,222,128,.16)}
+.btn-s{flex:1;padding:7px 12px;background:transparent;border:1px solid var(--border);color:var(--t2);font-size:11.5px;font-weight:500;border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
+.btn-s:hover{border-color:var(--t3);color:var(--t1);background:var(--panel)}
+
+/* ── SCAN GRID ── */
+.scan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.scan-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px}
+.scan-source{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.scan-score{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--t1);line-height:1}
+.scan-label{font-size:10.5px;color:var(--t3);margin-top:2px}
+.scan-rows{margin-top:8px}
+.scan-row{font-size:12px;color:var(--t2);padding:4px 0;border-top:1px solid var(--border-s);display:flex;justify-content:space-between}
+
+/* ── QUESTIONNAIRE ── */
+.q-hero{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.q-big{font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:var(--t1);line-height:1}
+.q-big em{font-style:normal;font-size:18px;color:var(--t3);margin-left:3px}
+.q-remaining{font-size:12px;color:var(--amber);font-family:'IBM Plex Mono',monospace;font-weight:500}
+.prog-track{height:4px;background:var(--border);border-radius:4px;margin-bottom:20px;overflow:hidden}
+.prog-fill{height:100%;background:var(--brand);border-radius:4px}
+.bar-rows{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-name{font-size:12.5px;color:var(--t2);width:180px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--brand)}
+.bar-fill.amber{background:var(--amber)}.bar-fill.red{background:var(--red)}
+.bar-count{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--t2);width:40px;text-align:right;flex-shrink:0}
+
+/* ── VENDOR OUTREACH BUNDLE ── */
+.bundle-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;margin-bottom:16px;
+}
+.bundle-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:14px 16px 10px;border-bottom:1px solid var(--border-s);
+}
+.bundle-title{font-size:15px;font-weight:600;color:var(--t1)}
+.bundle-sub{font-size:12px;color:var(--t3);margin-top:3px}
+.bundle-items{padding:6px 0}
+.bundle-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 16px;border-bottom:1px solid var(--border-s);
+  transition:background .12s;
+}
+.bundle-item:last-child{border-bottom:none}
+.bundle-item:hover{background:var(--card-h)}
+.bi-check{
+  width:20px;height:20px;border-radius:5px;
+  background:var(--green-d);border:1px solid var(--green-r);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--brand);flex-shrink:0;
+  cursor:pointer;transition:background .12s,border-color .12s,color .12s;
+  user-select:none;
+}
+.bi-check.unchecked{
+  background:var(--surface);border-color:var(--border);color:transparent;
+}
+.bi-body{flex:1;min-width:0}
+.bi-name{font-size:13.5px;font-weight:500;color:var(--t1)}
+.bi-sub{font-size:12px;color:var(--t3);margin-top:2px}
+.bi-edit{
+  font-size:11px;font-weight:500;color:var(--t3);
+  cursor:pointer;padding:3px 8px;border-radius:4px;
+  border:1px solid transparent;transition:all .12s;
+  font-family:'IBM Plex Sans',sans-serif;
+}
+.bi-edit:hover{color:var(--t2);border-color:var(--border);background:var(--panel)}
+
+/* Countdown + Send CTA */
+.countdown-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  border-top:1px solid var(--border-s);
+  background:var(--panel);
+}
+.countdown-label{font-size:11px;color:var(--t3)}
+.countdown-timer{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;font-weight:600;color:var(--t1);
+}
+.send-cta-wrap{padding:14px 16px 16px;background:var(--surface);border-top:1px solid var(--border)}
+.btn-send-all{
+  width:100%;padding:12px;
+  background:var(--brand);border:none;
+  color:#000;font-size:14px;font-weight:700;
+  border-radius:7px;cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif;
+  transition:background .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-send-all:hover{background:var(--brand-hover, #22C55E)}
+.btn-skip{
+  display:block;text-align:center;
+  font-size:11.5px;color:var(--t3);
+  margin-top:10px;cursor:pointer;
+  transition:color .12s;
+}
+.btn-skip:hover{color:var(--t2)}
+
+/* Spinner */
+.waiting{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--blue);font-style:italic;padding:4px 0}
+.spinner{width:12px;height:12px;border:1.5px solid var(--blue-r);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSE REVIEW ── */
+.cleared-box{background:var(--pos-bg);border:1px solid var(--pos-border);border-radius:4px;padding:12px 14px}
+.cleared-head{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--brand);margin-bottom:10px}
+.cleared-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);padding:4px 0}
+
+.rev-item{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden;transition:opacity .3s;
+}
+.rev-item.resolved .rev-head{display:none}
+.rev-item.resolved.expanded .rev-head{display:flex;opacity:.6;pointer-events:none}
+.rev-item.resolved .rev-body{display:none}
+.rev-item.resolved.expanded .rev-body{display:block;pointer-events:none;opacity:.65}
+.rev-item.resolved.expanded .rev-actions{display:none}
+.rev-head{display:flex;align-items:center;gap:10px;padding:14px 16px}
+.rev-name{font-size:14px;font-weight:600;color:var(--t1);flex:1}
+
+/* Round timeline */
+.rtl{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.rn{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.rn.done{background:var(--green-d);border:1px solid var(--green-r);color:var(--brand)}
+.rn.cur{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.rc{width:14px;height:1px;background:var(--border)}
+.rc.done{background:var(--green-r)}
+
+.rev-body{padding:0 16px 14px}
+.rev-flag{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;background:var(--panel);border:1px solid var(--ctn-border);border-left:2px solid var(--ctn);border-radius:0 4px 4px 0;margin-bottom:12px}
+.rev-flag-icon{color:var(--amber);font-size:14px;flex-shrink:0;margin-top:1px}
+.rev-flag-text{font-size:12.5px;color:var(--t1);line-height:1.65}
+
+.rh-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:5px}
+.rh-entry{display:flex;gap:9px;margin-bottom:5px;font-size:11px}
+.rh-r{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0}
+.rh-r.r1{background:var(--indigo-d);border:1px solid var(--indigo-r);color:var(--indigo)}
+.rh-r.r2{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.rh-text{color:var(--t2);line-height:1.5}
+.rh-compact{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;font-size:11px;color:var(--t3);line-height:1.65;margin-bottom:12px;font-family:'IBM Plex Mono',monospace}
+.rh-compact .rh-r{flex-shrink:0}
+.rh-compact .rh-sep{color:var(--t4);margin:0 2px}
+
+.rev-actions{display:flex;gap:6px;margin-top:10px}
+.btn-accept{padding:6px 14px;background:var(--green-d);border:1px solid var(--green-r);color:var(--brand);font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
+.btn-accept:hover{background:rgba(74,222,128,.16)}
+.btn-note{padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--t2);font-size:11px;font-weight:500;border-radius:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
+.btn-note:hover{border-color:var(--t3);color:var(--t1)}
+.btn-rereq{padding:6px 14px;background:transparent;border:1px solid var(--amber-r);color:var(--amber);font-size:11px;font-weight:500;border-radius:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .15s}
+.btn-rereq:hover{background:var(--amber-d)}
+
+/* Resolved state label */
+.resolved-label{display:none;align-items:center;gap:8px;padding:12px 16px;font-size:12.5px;font-weight:500;color:var(--t2);cursor:pointer;transition:background .12s;user-select:none}
+.resolved-label:hover{background:var(--card-h)}
+.rev-item.resolved .resolved-label{display:flex}
+.resolved-chevron{margin-left:auto;font-size:11px;color:var(--t3);transition:transform .15s;flex-shrink:0}
+.rev-item.resolved.expanded .resolved-chevron{transform:rotate(90deg)}
+
+/* Proceed CTA (review phase) */
+.proceed-cta{
+  margin-top:16px;padding:14px 16px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;
+}
+.proceed-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.proceed-count{font-size:12px;color:var(--t2)}
+.proceed-count strong{font-family:'IBM Plex Mono',monospace;color:var(--t1)}
+.btn-proceed{
+  padding:8px 18px;background:var(--brand);border:none;
+  color:#000;font-size:12px;font-weight:700;
+  border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+  transition:background .15s;white-space:nowrap;
+}
+.btn-proceed:hover{background:#22C55E}
+.btn-proceed:disabled{background:var(--border);color:var(--t3);cursor:not-allowed}
+
+/* AI context box */
+.ai-box{padding:12px 14px;background:var(--pos-bg);border:1px solid var(--pos-border);border-radius:4px;font-size:12.5px;color:var(--t2);line-height:1.65}
+.ai-box strong{color:var(--brand);font-weight:600}
+
+/* ── ASSESSMENT PIPELINE STRIP ── */
+.pipeline-strip{
+  height:38px;background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 20px;gap:0;flex-shrink:0;
+  overflow-x:auto;
+}
+.pipeline-strip::-webkit-scrollbar{display:none}
+.pipe-step{
+  display:flex;align-items:center;gap:6px;
+  padding:0 12px;height:38px;
+  font-size:11.5px;font-weight:500;color:var(--t3);
+  cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;
+  transition:color .12s,border-color .12s;
+  position:relative;
+}
+.pipe-step:hover{color:var(--t2)}
+.pipe-step.done{color:var(--t2)}
+.pipe-step.done .pipe-check{color:var(--brand)}
+.pipe-step.current{color:var(--t1);font-weight:600;border-bottom-color:var(--brand)}
+.pipe-step.locked{opacity:.4;cursor:default;pointer-events:none}
+.pipe-check{font-size:11px;color:var(--t3)}
+.pipe-sep{color:var(--t4);font-size:10px;flex-shrink:0}
+
+/* ── NEW ASSESSMENT BUTTON ── */
+.new-assessment-btn{
+  display:flex;align-items:center;gap:7px;
+  margin:0 8px 10px;
+  padding:8px 10px;
+  background:var(--brand);border:none;border-radius:6px;
+  color:#000;font-size:12px;font-weight:700;
+  cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+  transition:background .15s;white-space:nowrap;overflow:hidden;
+}
+.new-assessment-btn:hover{background:#22C55E}
+.new-assessment-btn svg{flex-shrink:0;width:14px;height:14px}
+.new-assessment-label{
+  opacity:0;transform:translateX(-6px);
+  transition:opacity .15s .04s,transform .15s .04s;
+  white-space:nowrap;
+}
+.primary-nav:hover .new-assessment-label{opacity:1;transform:translateX(0)}
+
+/* ── ASSESSMENT ZONE (Layer 2 — lives right of primary nav) ── */
+.assessment-zone{display:flex;flex-direction:column;flex:1;overflow:hidden;min-width:0}
+.assessment-body{display:flex;flex:1;overflow:hidden}
+
+/* Phase views */
+.phase-view{display:none;flex-direction:column;height:100%}
+.phase-view.active{display:flex}
+
+/* ── CLEARED ROWS (expandable) ── */
+.cleared-row{padding:6px 0;border-top:1px solid var(--green-r);cursor:pointer}
+.cleared-row-main{display:flex;align-items:center;gap:8px}
+.cleared-chevron{font-size:11px;color:var(--brand);margin-left:auto;flex-shrink:0;transition:transform .15s}
+.cleared-row.open .cleared-chevron{transform:rotate(90deg)}
+.cleared-detail{display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(74,222,128,.12)}
+.cleared-row.open .cleared-detail{display:block}
+.btn-override{font-size:10.5px;font-weight:500;padding:4px 10px;border-radius:4px;background:transparent;border:1px solid var(--border);color:var(--t3);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all .12s;margin-top:6px}
+.btn-override:hover{border-color:var(--amber-r);color:var(--amber)}
+
+/* ── AI META ROW (confidence + rule + recommendation) ── */
+.ai-meta{display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap;font-size:11px;color:var(--t3)}
+.ai-conf{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px}
+.ai-conf.high{background:var(--green-d);border:1px solid var(--green-r);color:var(--brand)}
+.ai-conf.med{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.ai-rec{color:var(--amber);font-weight:500}
+
+/* ── BUTTON HINT ── */
+.btn-hint{font-size:9.5px;color:var(--t3);margin-top:6px;line-height:1.7}
+.btn-hint b{color:var(--t2);font-weight:500}
+
+/* ── EXPAND AFFORDANCE ── */
+.expand-chevron{font-size:11px;color:var(--t3);transition:transform .2s;margin-top:4px;flex-shrink:0}
+.doc-row.expanded .expand-chevron{transform:rotate(90deg);color:var(--t2)}
+
+/* ── NAVIGABLE AI LOG ── */
+.ai-entry{font-size:10.5px;color:var(--t2);font-family:'IBM Plex Mono',monospace;border-left:2px solid var(--border);padding-left:8px;margin-bottom:5px;line-height:1.45;cursor:pointer;transition:border-color .12s,color .12s}
+.ai-entry:hover{border-left-color:var(--brand);color:var(--t1)}
+
+/* ── AI JUDGMENT CALLOUT ── */
+.ai-judgment{margin-top:10px;padding:9px 12px;background:rgba(74,222,128,.06);border-left:2px solid var(--brand);border-radius:0 4px 4px 0;font-size:12px;color:var(--t2);line-height:1.65}
+.ai-judgment strong{color:var(--brand);font-weight:600}
+
+/* ── RISK VIEW ── */
+.risk-two-col{display:flex;gap:16px;align-items:flex-start}
+.risk-left{flex:1;min-width:0}
+.risk-right{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+
+/* Tier cards */
+.tier-cards{display:flex;gap:8px}
+.tier-card{flex:1;padding:12px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;text-align:center;cursor:pointer;transition:all .15s}
+.tier-card:hover{background:var(--card-h)}
+.tier-card.selected{background:var(--amber-d);border-color:var(--amber-r)}
+.tier-card-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px}
+.tier-card.selected .tier-card-label{color:var(--amber)}
+.tier-card-name{font-size:13px;font-weight:700;color:var(--t2)}
+.tier-card.selected .tier-card-name{color:var(--amber)}
+.tier-card-sub{font-size:9px;color:var(--t3);margin-top:3px}
+.tier-card.selected .tier-card-sub{color:var(--amber)}
+.tier-badge{display:inline-block;margin-top:5px;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:var(--ctn-bg);border:1px solid var(--ctn-border);color:var(--ctn);font-family:'IBM Plex Mono',monospace}
+
+/* Vendor profile */
+.vendor-profile{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px}
+.vp-name{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.vp-row{display:flex;justify-content:space-between;font-size:10.5px;padding:3px 0;border-top:1px solid var(--border-s)}
+.vp-key{color:var(--t3)}.vp-val{color:var(--t2);font-family:'IBM Plex Mono',monospace;font-size:10px}
+.vp-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
+.risk-tag{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--crit-bg);border:1px solid var(--crit-border);color:var(--crit);font-family:'IBM Plex Mono',monospace}
+.reg-tag{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--neutral-bg);border:1px solid var(--neutral-border);color:var(--neutral);font-family:'IBM Plex Mono',monospace}
+
+/* Risk dimensions */
+.risk-dim-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.risk-dim-name{font-size:12px;color:var(--t2);width:150px;flex-shrink:0}
+.risk-dim-track{flex:1;height:5px;background:var(--border);border-radius:4px;overflow:hidden}
+.risk-dim-fill{height:100%;border-radius:4px;background:var(--red);transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.risk-dim-fill.amber{background:var(--amber)}
+.risk-dim-score{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;width:24px;text-align:right;flex-shrink:0;color:var(--red)}
+.risk-dim-score.amber{color:var(--amber)}
+
+/* Typing indicator */
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:typeBounce .9s infinite ease-in-out;flex-shrink:0}
+@keyframes typeBounce{0%,80%,100%{transform:scale(.55);opacity:.35}40%{transform:scale(1);opacity:.85}}
+/* Ask input */
+.risk-ask-input{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+
+/* Confirm CTA */
+.btn-confirm-risk{width:100%;padding:12px;background:var(--pos);border:none;color:#000;font-size:13px;font-weight:700;border-radius:7px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-confirm-risk:hover{background:#22C55E}
+
+/* Processing animation */
+.processing-wrap{display:flex;flex-direction:column;align-items:center;padding:32px 22px}
+.proc-bar-track{width:100%;height:3px;background:var(--border);border-radius:4px;margin-bottom:28px;overflow:hidden}
+.proc-bar-fill{height:100%;background:var(--amber);border-radius:4px;width:0%;transition:width .4s ease}
+.proc-steps{width:100%;max-width:560px;display:flex;flex-direction:column;gap:0}
+.proc-step{display:flex;align-items:flex-start;gap:10px;padding:7px 0;opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s;font-size:11.5px;color:var(--t2);border-bottom:1px solid var(--border-s)}
+.proc-step:last-child{border-bottom:none}
+.proc-step.visible{opacity:1;transform:translateY(0)}
+.proc-step.done .proc-icon{color:var(--brand)}
+.proc-step.active .proc-icon{color:var(--amber);animation:blink 1s ease-in-out infinite}
+.proc-icon{width:16px;font-size:12px;flex-shrink:0;margin-top:1px;font-family:'IBM Plex Mono',monospace}
+.proc-label{flex:1;line-height:1.5}
+.proc-label .proc-detail{font-size:10px;color:var(--t3);margin-top:2px;font-family:'IBM Plex Mono',monospace}
+.proc-complete{text-align:center;margin-top:20px;opacity:0;transition:opacity .4s}
+.proc-complete.visible{opacity:1}
+
+/* AI narrative chat */
+.ai-chat{display:flex;flex-direction:column;gap:12px}
+.ai-chat-msg{display:flex;gap:10px;align-items:flex-start}
+.ai-chat-avatar{width:26px;height:26px;border-radius:50%;background:var(--green-d);border:1px solid var(--green-r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ai-chat-bubble{background:var(--card);border:1px solid var(--border-s);border-radius:0 6px 6px 6px;padding:12px 14px;font-size:12.5px;color:var(--t2);line-height:1.7;flex:1}
+.ai-chat-bubble strong{color:var(--brand)}
+
+/* ── AI BRIEFING PANEL ── */
+.brief-timeline{position:relative;padding-left:32px;margin-bottom:20px}
+/* Vertical line — positioned so its center (left:11+1=12px) aligns with dot center */
+.brief-timeline::before{content:'';position:absolute;left:11px;top:12px;bottom:0;width:2px;background:var(--border);border-radius:1px}
+.brief-step{position:relative;padding:0 0 24px 20px;cursor:pointer;transition:opacity .12s}
+.brief-step:last-child{padding-bottom:0}
+.brief-step:hover{opacity:.8}
+/* Dot: left:-27px from step → step starts at 32px → dot left edge at 5px → center at 10px.
+   With 32px timeline padding + left:-22px centering = 32-22=10px. Using -27px + 5px radius = 10px. */
+.brief-step::before{content:'';position:absolute;left:-22px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--border);border:2px solid var(--surface)}
+.brief-step.done::before{background:var(--brand)}
+.brief-step.attn::before{background:var(--amber);box-shadow:0 0 0 3px var(--amber-d)}
+.brief-step-date{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.brief-step-title{font-size:13.5px;font-weight:600;color:var(--t1);margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.brief-step-text{font-size:12.5px;color:var(--t2);line-height:1.7}
+.brief-step-link{font-size:10px;color:var(--t3);margin-top:4px;font-family:'IBM Plex Mono',monospace}
+.brief-step:hover .brief-step-link{color:var(--brand)}
+
+.brief-attn-box{background:var(--panel);border:1px solid var(--ctn-border);border-left:2px solid var(--ctn);border-radius:0 8px 8px 0;padding:14px 16px;margin-top:8px}
+.brief-attn-title{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.brief-attn-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--amber-r);cursor:pointer;transition:opacity .12s}
+.brief-attn-item:hover{opacity:.8}
+.brief-attn-item-num{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:rgba(245,158,11,.2);border:1px solid var(--amber-r);color:var(--amber);flex-shrink:0;margin-top:1px}
+.brief-attn-item-body{flex:1;min-width:0}
+.brief-attn-item-name{font-size:13px;font-weight:500;color:var(--t1)}
+.brief-attn-item-desc{font-size:12px;color:var(--t3);margin-top:3px;line-height:1.55}
+.brief-attn-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--amber-r)}
+
+/* ── GAP ANALYSIS ── */
+.gap-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border-s)}
+.gap-item:last-child{border-bottom:none}
+.gap-risk{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0;margin-top:1px}
+.gap-risk.high{background:var(--red-d);border:1px solid var(--red-r);color:var(--red)}
+.gap-risk.med{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.gap-body{flex:1;min-width:0}
+.gap-name{font-size:13px;font-weight:500;color:var(--t1)}
+.gap-reason{font-size:12px;color:var(--t3);margin-top:3px;line-height:1.6}
+.gap-fw{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--indigo);margin-top:3px}
+
+/* ── EMAIL PREVIEW ── */
+.email-preview{display:none;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.email-preview.open{display:block}
+.email-header{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel)}
+.email-field{font-size:11px;color:var(--t2);padding:2px 0;display:flex;gap:8px}
+.email-field-label{color:var(--t3);width:32px;flex-shrink:0}
+.email-body{padding:12px 14px;font-size:11.5px;color:var(--t2);line-height:1.7;white-space:pre-wrap}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--t3)}
+
+/* ── ACCESSIBILITY: SCREEN READER ONLY ── */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── ACCESSIBILITY: FOCUS INDICATORS ── */
+/* Visible focus ring for all interactive elements — keyboard navigation */
+:focus{outline:none}
+:focus-visible{
+  outline:2px solid var(--focus-ring);
+  outline-offset:2px;
+  border-radius:4px;
+}
+/* Tighter radius for pill/round elements */
+.phase-item:focus-visible,.nav-item:focus-visible,.stat-cell:focus-visible{border-radius:3px}
+.btn-send-all:focus-visible,.btn-confirm-risk:focus-visible,.btn-proceed:focus-visible{border-radius:7px}
+.new-assessment-btn:focus-visible{border-radius:6px}
+/* Skip link — screen reader / keyboard users jump to main content */
+.skip-link{
+  position:absolute;left:-9999px;top:8px;z-index:9999;
+  background:var(--brand);color:#000;font-weight:700;font-size:13px;
+  padding:8px 16px;border-radius:4px;text-decoration:none;
+  transition:left 0s;
+}
+.skip-link:focus{left:12px}
+
+/* ── LUCIDE ICONS ── */
+i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle}
+.dstatus{display:flex;align-items:center;gap:4px}
+.pipe-check{display:inline-flex;align-items:center}
+
+/* ── ACCESSIBILITY: REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+/* ── BRIEFING STEP ANIMATION — each step reveals sequentially ── */
+.brief-step{
+  position:relative; /* ensure ::after ring is positioned correctly */
+  opacity:0;transform:translateY(5px);
+  transition:opacity .38s ease,transform .38s ease;
+}
+.brief-step.visible{opacity:1;transform:none}
+/* Scanning: dot turns amber and pulses */
+.brief-step.scanning::before{
+  background:var(--ctn) !important;
+  box-shadow:0 0 0 3px var(--ctn-bg) !important;
+  animation:blink 1s ease-in-out infinite;
+}
+/* Spinning ring around dot — dot center is at left:-22+5=-17px, top:4+5=9px from step */
+/* Ring 16×16 centered on dot: left = -17-8 = -25px, top = 9-8 = 1px */
+.brief-step.scanning::after{
+  content:'';position:absolute;
+  left:-25px;top:1px;
+  width:16px;height:16px;
+  border-radius:50%;
+  border:1.5px solid rgba(245,158,11,.2);
+  border-top-color:var(--ctn);
+  animation:spin 1.1s linear infinite;
+}
+/* Attention box hidden until all steps loaded */
+.brief-attn-box{
+  opacity:0;
+  transition:opacity .4s ease;
+}
+.brief-attn-box.visible{opacity:1}
+
+/* ── NOTE INPUT (accept-with-note) ── */
+.note-input-wrap{
+  display:none;margin-top:10px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:5px;padding:10px;
+}
+.note-input-wrap.open{display:block}
+.note-textarea{
+  width:100%;min-height:58px;padding:8px 10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:4px;color:var(--t1);font-size:12px;
+  font-family:'IBM Plex Sans',sans-serif;resize:vertical;
+  line-height:1.5;
+}
+.note-textarea:focus{border-color:var(--pos-border);outline:none}
+.note-textarea::placeholder{color:var(--t3)}
+.note-btn-row{display:flex;gap:6px;margin-top:7px}
+
+/* ── RE-REQUEST QUEUE BUNDLE ── */
+.requeue-bundle{
+  display:none;margin-top:16px;
+  background:var(--card);border:1px solid var(--ctn-border);
+  border-radius:8px;overflow:hidden;
+}
+.requeue-bundle-hd{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 16px;border-bottom:1px solid var(--border-s);
+  background:var(--ctn-bg);
+}
+.requeue-bundle-hd-title{font-size:12.5px;font-weight:600;color:var(--amber);flex:1}
+.requeue-bundle-hd-count{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--amber);background:rgba(245,158,11,.15);padding:2px 6px;border-radius:3px;border:1px solid var(--ctn-border)}
+.requeue-items{padding:4px 0}
+.queue-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;border-bottom:1px solid var(--border-s);
+}
+.queue-item:last-child{border-bottom:none}
+.requeue-send-wrap{padding:12px 16px;border-top:1px solid var(--border-s);background:var(--surface)}
+
+/* ── PHASE 5: SPLIT PANE ── */
+.p5-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.p5-tab{flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--t3);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:color .12s;border-bottom:2px solid transparent;font-family:'IBM Plex Sans',sans-serif}
+.p5-tab:hover{color:var(--t2)}
+.p5-tab.active{color:var(--t1);border-bottom-color:var(--brand)}
+.p5-cnt{font-size:8.5px;font-family:'IBM Plex Mono',monospace;padding:1px 4px;border-radius:3px;background:var(--card)}
+.p5-group-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);padding:9px 12px 3px;background:var(--bg);border-bottom:1px solid var(--border-s)}
+.p5-item{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border-s);transition:background .1s;position:relative}
+.p5-item:hover{background:var(--card)}
+.p5-item.active{background:var(--panel);border-left:2px solid var(--brand);padding-left:10px}
+.p5-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.p5-ibody{flex:1;min-width:0}
+.p5-iname{font-size:11.5px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p5-imeta{display:flex;align-items:center;gap:4px;margin-top:3px}
+.p5-rnd{font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:700;padding:1px 4px;background:var(--card);border:1px solid var(--border);border-radius:2px;color:var(--t3)}
+.p5-tp{font-size:9px;color:var(--t3)}
+.p5-ag{font-size:9.5px;color:var(--t3)}
+.p5-arr{color:var(--t3);font-size:13px;flex-shrink:0;line-height:1}
+/* Thread panels */
+.p5-thread{display:none;flex-direction:column;flex:1;overflow:hidden}
+.p5-thread.active{display:flex}
+.p5-thd{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;display:flex;align-items:center;gap:10px}
+.p5-thd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.p5-thd-name{font-size:13px;font-weight:600;color:var(--t1)}
+.p5-thd-meta{font-size:10.5px;color:var(--t3);margin-top:3px}
+/* Thread body — this doubles as #rev-N for JS compat */
+.p5-tbody{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+/* Rounds */
+.t-round{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.t-round.cur{border-color:rgba(245,158,11,.35)}
+.t-rlbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);font-family:'IBM Plex Mono',monospace;margin-bottom:2px}
+.t-out{background:var(--surface);border:1px solid var(--border-s);border-radius:5px;padding:9px 11px}
+.t-out-from{font-size:9.5px;color:var(--t3);font-weight:500;margin-bottom:4px;font-family:'IBM Plex Mono',monospace}
+.t-out-text{font-size:11.5px;color:var(--t2);line-height:1.55;font-style:italic}
+.t-in{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.22);border-radius:5px;padding:9px 11px}
+.t-in-from{font-size:9.5px;color:var(--blue);font-weight:500;margin-bottom:4px;font-family:'IBM Plex Mono',monospace}
+.t-in-text{font-size:11.5px;color:var(--t2);line-height:1.55}
+.t-wait{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface);border-radius:5px;border:1px solid var(--border)}
+/* Analyst actions (inside thread body) */
+.t-actions{padding:12px 0 0;border-top:1px solid var(--border-s);margin-top:2px;display:flex;flex-direction:column;gap:8px}
+.t-action-hint{font-size:10px;color:var(--t3)}
+.t-action-btns{display:flex;gap:8px}
+/* Resolved state via class — CSS hides actions, shows resolved bar */
+.p5-tbody.resolved .t-actions{display:none}
+.p5-tbody.resolved .note-input-wrap{display:none!important}
+.t-resolved-bar{display:none;align-items:center;gap:8px;padding:10px 12px;background:var(--green-d);border:1px solid var(--green-r);border-radius:6px;font-size:12px;font-weight:500;color:var(--brand)}
+.p5-tbody.resolved .t-resolved-bar{display:flex}
+/* Resolved list item */
+.p5-item.p5-done .p5-iname{color:var(--t2)}
+/* Requeue panel (pinned bottom of right pane) */
+.p5-rq-panel{flex-shrink:0;border-top:1px solid var(--border);background:var(--surface);display:none;max-height:240px;overflow-y:auto}
+.p5-rq-panel.open{display:block}
+/* Proceed bar (bottom of left pane) */
+.p5-proceed{padding:10px 12px;border-top:1px solid var(--border);background:var(--surface);display:none}
+.p5-proceed.show{display:block}
+/* Stat flash animation */
+@keyframes statPop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.stat-flash{animation:statPop .35s ease}
+/* List item exit/enter animations */
+@keyframes itemExit{0%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(-16px)}}
+@keyframes itemEnter{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+.p5-item-exiting{animation:itemExit .25s ease forwards;pointer-events:none}
+.p5-item-entering{animation:itemEnter .3s ease forwards}
+/* Bulk action bar */
+.p5-bulk{display:none;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.p5-bulk.show{display:flex}
+.p5-bulk-label{font-size:10.5px;color:var(--t3)}
+.p5-bulk-btn{font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:4px;border:1px solid var(--brand);background:transparent;color:var(--brand);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:background .12s}
+.p5-bulk-btn:hover{background:var(--green-d)}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- TOPBAR -->
+<header class="topbar" role="banner">
+  <nav aria-label="Breadcrumb">
+  <div class="bc">
+    <span class="cur">New Vendor Assessment</span>
+    <span class="sep" aria-hidden="true">›</span>
+    <span class="cur">Twilio Inc.</span>
+    <span class="sep" aria-hidden="true">›</span>
+    <span class="act" aria-current="page">Evidence Collection</span>
+  </div>
+  </nav>
+  <div class="tb-right">
+    <div class="ai-pill" role="status" aria-live="polite" aria-label="AI status: Active, monitoring vendor portal"><div class="ai-dot" aria-hidden="true"></div>AI Active · Monitoring vendor portal</div>
+    <div class="avatar" aria-label="Current user: SG">SG</div>
+  </div>
+</header>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- PRIMARY ZANIA NAV -->
+  <nav class="primary-nav" aria-label="Zania application navigation">
+    <!-- Logo -->
+    <div class="nav-logo-wrap">
+      <div class="nav-logo">
+        <div class="nav-logo-mark">Z</div>
+      </div>
+      <span class="nav-logo-text">zan<em>ia</em></span>
+    </div>
+
+    <!-- New Assessment -->
+    <button class="new-assessment-btn" aria-label="Create new assessment">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M7 1v12M1 7h12"/>
+      </svg>
+      <span class="new-assessment-label" aria-hidden="true">New Assessment</span>
+    </button>
+
+    <!-- Dashboard -->
+    <div class="nav-item" tabindex="0" role="button" aria-label="Dashboard">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="5" height="5" rx="1"/>
+          <rect x="9.5" y="1.5" width="5" height="5" rx="1"/>
+          <rect x="1.5" y="9.5" width="5" height="5" rx="1"/>
+          <rect x="9.5" y="9.5" width="5" height="5" rx="1"/>
+        </svg>
+      </div>
+      <span class="nav-label" aria-hidden="true">Dashboard</span>
+    </div>
+
+    <!-- Vendors (active) -->
+    <div class="nav-item active" tabindex="0" role="button" aria-label="Vendors" aria-current="page">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="5.5" cy="4.5" r="2"/>
+          <path d="M1 13c0-2.5 2-3.5 4.5-3.5S10 10.5 10 13"/>
+          <circle cx="12" cy="4.5" r="1.5"/>
+          <path d="M10.5 13h4c0-2-1.5-3-3.5-3"/>
+        </svg>
+      </div>
+      <span class="nav-label" aria-hidden="true">Vendors</span>
+    </div>
+
+    <!-- Reports -->
+    <div class="nav-item" tabindex="0" role="button" aria-label="Reports">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 12V8M5.5 12V5M9 12V8M12.5 12V3"/>
+          <path d="M1 12.5h13.5"/>
+        </svg>
+      </div>
+      <span class="nav-label" aria-hidden="true">Reports</span>
+    </div>
+
+    <!-- Risk Register -->
+    <div class="nav-item" tabindex="0" role="button" aria-label="Risk Register">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 1.5L2.5 4v4.5c0 3 2.5 5 5.5 5.5 3-.5 5.5-2.5 5.5-5.5V4L8 1.5z"/>
+          <path d="M5.5 8l2 2 3-3"/>
+        </svg>
+      </div>
+      <span class="nav-label" aria-hidden="true">Risk Register</span>
+    </div>
+
+    <div class="nav-divider" role="separator"></div>
+
+    <!-- Integrations -->
+    <div class="nav-item" tabindex="0" role="button" aria-label="Integrations">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9.5 6.5L6.5 9.5"/>
+          <path d="M11 5l1.5-1.5a2.12 2.12 0 000-3 2.12 2.12 0 00-3 0L8 2"/>
+          <path d="M5 11l-1.5 1.5a2.12 2.12 0 000 3 2.12 2.12 0 003 0L8 14"/>
+          <path d="M6 5.5L5 4.5M10.5 11L11.5 12"/>
+        </svg>
+      </div>
+      <span class="nav-label" aria-hidden="true">Integrations</span>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <!-- Settings -->
+    <div class="nav-item" tabindex="0" role="button" aria-label="Settings">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="2.5"/>
+          <path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/>
+        </svg>
+      </div>
+      <span class="nav-label" aria-hidden="true">Settings</span>
+    </div>
+  </nav>
+
+  <!-- ASSESSMENT ZONE — Layer 2+3, lives right of primary nav -->
+  <div class="assessment-zone">
+
+    <!-- Pipeline strip — scoped to assessment context only -->
+    <nav class="pipeline-strip" aria-label="Assessment pipeline stages" role="navigation">
+      <div class="pipe-step done"><span class="pipe-check" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></span> Intake <span class="sr-only">(complete)</span></div>
+      <span class="pipe-sep" aria-hidden="true">›</span>
+      <div class="pipe-step done"><span class="pipe-check" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></span> Risk Tiering <span class="sr-only">(complete)</span></div>
+      <span class="pipe-sep" aria-hidden="true">›</span>
+      <div class="pipe-step current" aria-current="step">Evidence Collection</div>
+      <span class="pipe-sep" aria-hidden="true">›</span>
+      <div class="pipe-step locked" aria-disabled="true">Risk Assessment</div>
+      <span class="pipe-sep" aria-hidden="true">›</span>
+      <div class="pipe-step locked" aria-disabled="true">Emails</div>
+      <span class="pipe-sep" aria-hidden="true">›</span>
+      <div class="pipe-step locked" aria-disabled="true">Monitoring</div>
+    </nav>
+
+    <!-- Assessment body: phase nav + main content -->
+    <div class="assessment-body">
+
+  <!-- PHASE NAV -->
+  <nav class="phase-nav" aria-label="Evidence collection phases">
+    <div class="nav-section-label">Evidence Collection</div>
+    <div class="vendor-card">
+      <div class="vendor-name">Twilio Inc. <span class="tier">TIER 2</span></div>
+      <div class="vendor-meta">twilio.com · Communications SaaS</div>
+    </div>
+    <div class="nav-stats" role="list" aria-label="Evidence collection summary">
+      <div class="stat-cell" onclick="go(3)" tabindex="0" role="listitem button" aria-label="76 percent evidence coverage — click to view questionnaire"><div class="stat-val green" id="sv-coverage" aria-hidden="true">76%</div><div class="stat-key" aria-hidden="true">Coverage</div></div>
+      <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="19 open gaps still unresolved — click to view vendor communication"><div class="stat-val amber" id="sv-gaps" aria-hidden="true">19</div><div class="stat-key" aria-hidden="true">Open Gaps</div></div>
+      <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="3 items awaiting your review — click to view vendor communication"><div class="stat-val" style="color:var(--red)" id="sv-awaiting" aria-hidden="true">3</div><div class="stat-key" aria-hidden="true">Awaiting Me</div></div>
+      <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="Round 2 of communication — click to view vendor communication"><div class="stat-val blue" aria-hidden="true">R2</div><div class="stat-key" aria-hidden="true">Round</div></div>
+    </div>
+
+    <div class="nav-group-label">Overview</div>
+    <div class="phase-item active" id="pn-brief" onclick="go('brief')" tabindex="0" role="button" aria-current="true" aria-label="AI Briefing — Collection complete, start here">
+      <div class="pstep" style="background:var(--pos-bg);border:1px solid var(--pos-border)" aria-hidden="true"><div class="ai-dot" style="width:7px;height:7px;margin:0"></div></div>
+      <div class="pinfo"><div class="pname">AI Briefing</div><div class="psub green" aria-label="Collection complete, start here">Collection complete · start here</div></div>
+    </div>
+
+    <div class="nav-group-label" style="border-top:1px solid var(--border-s);margin-top:2px">Phases 1–6</div>
+    <div class="phase-list" role="list">
+      <div class="phase-item" id="pn0" onclick="go(0)" tabindex="0" role="listitem button" aria-label="Phase 1: External Security Scan — complete, 3 sources scanned" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+        <div class="pstep done" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></div>
+        <div class="pinfo"><div class="pname">1 · External Security Scan</div><div class="psub green">3 sources scanned</div></div>
+      </div>
+      <div class="phase-item" id="pn1" onclick="go(1)" tabindex="0" role="listitem button" aria-label="Phase 2: Trust Center Discovery — complete, 5 collected, pen test via outreach" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+        <div class="pstep done" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></div>
+        <div class="pinfo"><div class="pname">2 · Trust Center Discovery</div><div class="psub green">5 collected · pen test via outreach</div></div>
+      </div>
+      <div class="phase-item" id="pn2" onclick="go(2)" tabindex="0" role="listitem button" aria-label="Phase 3: Public Registry and Screening — clear with 1 historical incident" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+        <div class="pstep done" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></div>
+        <div class="pinfo"><div class="pname">3 · Public Registry & Screening</div><div class="psub amber">Clear · 1 historical incident</div></div>
+      </div>
+      <div class="phase-item" id="pn3" onclick="go(3)" tabindex="0" role="listitem button" aria-label="Phase 4: Questionnaire Coverage — in progress, 76 percent, 44 remaining" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+        <div class="pstep prog" aria-hidden="true"><i data-lucide="loader-2" style="width:11px;height:11px"></i></div>
+        <div class="pinfo"><div class="pname">4 · Questionnaire Coverage</div><div class="psub indigo">76% · 44 remaining</div></div>
+      </div>
+      <div id="pn4" style="display:none"></div>
+      <div class="phase-item" id="pn5" onclick="go(5)" tabindex="0" role="listitem button" aria-label="Vendor Communication — 3 items need review" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .4s,transform .4s">
+        <div class="pstep bad" aria-hidden="true"><i data-lucide="mail" style="width:11px;height:11px;stroke-width:2"></i></div>
+        <div class="pinfo"><div class="pname">5 · Vendor Communication</div><div class="psub red" id="review-nav-sub">3 items need review</div></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content" tabindex="-1" aria-label="Evidence collection content">
+
+    <!-- ── AI BRIEFING (default landing) ── -->
+    <div class="phase-view active" id="pv-brief">
+      <div class="ph">
+        <div class="ph-row">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="ai-dot"></div>
+            <div class="ph-title">AI Briefing — Twilio Inc.</div>
+          </div>
+          <span class="badge complete">COLLECTION COMPLETE</span>
+        </div>
+        <div class="ph-desc">Here's what I did across all 6 evidence collection phases — and what needs your judgment before we proceed</div>
+        <div class="ph-meta">
+          <div class="ph-meta-item"><strong>7</strong> docs collected</div>
+          <div class="ph-meta-item"><strong>142</strong>/186 questions filled</div>
+          <div class="ph-meta-item"><strong>2</strong> outreach rounds</div>
+          <div class="ph-meta-item" style="color:var(--red)"><strong>3</strong> items need your review</div>
+          <div class="ph-meta-item" style="color:var(--t3)">4 days elapsed · Mar 12–16</div>
+        </div>
+      </div>
+      <div class="pc">
+
+        <div class="slabel" style="margin-bottom:16px">What I did</div>
+        <div class="brief-timeline">
+
+          <div class="brief-step done" onclick="go(0)" tabindex="0" role="button" aria-label="Phase 1: External Security Scan — complete. Click to view scan results.">
+            <div class="brief-step-date">Mar 12, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
+            <div class="brief-step-title">1 · External Security Scan</div>
+            <div class="brief-step-text">Scanned BitSight (849), SecurityScorecard (91), and Shodan. No critical exposures — patching cadence flagged at B+ and noted for follow-up.</div>
+            <div class="brief-step-link" aria-hidden="true">Click to view scan results →</div>
+          </div>
+
+          <div class="brief-step done" onclick="go(1)" tabindex="0" role="button" aria-label="Phase 2: Trust Center Discovery — complete. Click to view collected documents.">
+            <div class="brief-step-date">Mar 12, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
+            <div class="brief-step-title">2 · Trust Center Discovery</div>
+            <div class="brief-step-text">Collected 5 docs from the trust center. Pen test required a mutual NDA — I flagged it, initiated outreach, and obtained the report after DocuSign sign-off.</div>
+            <div class="ai-judgment"><strong>I decided to:</strong> Automatically identify the NDA requirement from the trust center access error, add the pen test to the outreach queue, and draft the NDA request — without waiting for your instruction.</div>
+            <div class="brief-step-link" aria-hidden="true">Click to view collected documents →</div>
+          </div>
+
+          <div class="brief-step done" onclick="go(2)" tabindex="0" role="button" aria-label="Phase 3: Public Registry and Screening — complete. Click to view screening results.">
+            <div class="brief-step-date">Mar 12, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
+            <div class="brief-step-title">3 · Public Registry & Screening</div>
+            <div class="brief-step-text">All registries clear. One historical incident — Aug 2022 phishing attack, ~130 customers affected, fully remediated. No ongoing risk.</div>
+            <div class="brief-step-link" aria-hidden="true">Click to view screening results →</div>
+          </div>
+
+          <div class="brief-step done" onclick="go(3)" tabindex="0" role="button" aria-label="Phase 4: Questionnaire Coverage — complete. Click to view coverage by section.">
+            <div class="brief-step-date">Mar 13, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
+            <div class="brief-step-title">4 · Questionnaire Coverage</div>
+            <div class="brief-step-text">142 of 186 questions (76%) auto-filled from collected evidence. Remaining 44 — spanning Business Continuity, HR Security, and 5 other sections — bundled for vendor outreach.</div>
+            <div class="brief-step-link" aria-hidden="true">Click to view coverage by section →</div>
+          </div>
+
+          <div class="brief-step done" onclick="go(4)" tabindex="0" role="button" aria-label="Phase 5: Vendor Outreach — sent. Click to view outreach bundle and email draft.">
+            <div class="brief-step-date">Mar 14, 2025 <span class="badge sent" style="font-size:8px;padding:1px 5px">SENT</span></div>
+            <div class="brief-step-title">5 · Vendor Outreach</div>
+            <div class="brief-step-text">Compiled 4 doc gaps + 44 questionnaire items into a single bundle and dispatched to security@twilio.com (Round 2). Auto-escalated after Round 1 SLA expired with the pen test still outstanding.</div>
+            <div class="ai-judgment"><strong>I decided to:</strong> Trigger Round 2 automatically when Round 1 responses didn't include a current pen test. I flagged it as a policy violation in the outreach message and set a shorter response window — without you needing to review Round 1 first.</div>
+            <div class="brief-step-link" aria-hidden="true">Click to view outreach bundle and email draft →</div>
+          </div>
+
+
+        </div>
+
+        <div class="brief-attn-box" role="region" aria-label="Action needed">
+          <div class="brief-attn-title">
+            <i data-lucide="send" style="width:15px;height:15px;color:var(--ctn)" aria-hidden="true"></i> 1 action needed to continue
+          </div>
+          <div class="brief-attn-item" onclick="go(4)" tabindex="0" role="button" aria-label="Send vendor outreach bundle — click to review and send">
+            <span class="brief-attn-item-num" aria-hidden="true">01</span>
+            <div class="brief-attn-item-body">
+              <div class="brief-attn-item-name">Send vendor outreach bundle</div>
+              <div class="brief-attn-item-desc">5 items compiled — 4 doc requests + 44 questionnaire Qs. Review and dispatch to security@twilio.com.</div>
+            </div>
+          </div>
+          <div class="brief-attn-footer">
+            <div style="font-size:11px;color:var(--t3)">Vendor responses unlock Phase 6 · Response Review</div>
+            <button class="btn-proceed" onclick="go(4)">Review bundle →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PHASE 0: External Security Scan ── -->
+    <div class="phase-view" id="pv0">
+      <div class="ph">
+        <div class="ph-row"><div class="ph-title">External Security Scan</div><span class="badge complete">COMPLETE</span></div>
+        <div class="ph-desc">AI surface scan across BitSight, SecurityScorecard, and Shodan — no critical exposures found</div>
+        <div class="ph-meta">
+          <div class="ph-meta-item"><strong>3</strong> sources scanned</div>
+          <div class="ph-meta-item"><strong>849</strong> BitSight score</div>
+          <div class="ph-meta-item"><strong>0</strong> critical exposures</div>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="slabel" style="margin-bottom:12px">Security Ratings</div>
+        <div class="scan-grid">
+          <div class="scan-card">
+            <div class="scan-source">BitSight</div>
+            <div class="scan-score">849</div>
+            <div class="scan-label">Security rating · Advanced</div>
+            <div class="scan-rows">
+              <div class="scan-row"><span>Diligence</span><span style="color:var(--t2)">A</span></div>
+              <div class="scan-row"><span>User Behavior</span><span style="color:var(--t2)">A</span></div>
+              <div class="scan-row"><span>Public Disclosure</span><span style="color:var(--ctn)">B+</span></div>
+            </div>
+          </div>
+          <div class="scan-card">
+            <div class="scan-source">SecurityScorecard</div>
+            <div class="scan-score">91</div>
+            <div class="scan-label">Overall score · A</div>
+            <div class="scan-rows">
+              <div class="scan-row"><span>Network Security</span><span style="color:var(--t2)">95</span></div>
+              <div class="scan-row"><span>DNS Health</span><span style="color:var(--t2)">88</span></div>
+              <div class="scan-row"><span>Patching Cadence</span><span style="color:var(--ctn)">79</span></div>
+            </div>
+          </div>
+          <div class="scan-card">
+            <div class="scan-source">Shodan</div>
+            <div class="scan-score" style="font-size:20px;margin-top:4px">Clear</div>
+            <div class="scan-label">No exposed services found</div>
+            <div class="scan-rows">
+              <div class="scan-row"><span>Open ports</span><span style="color:var(--t2)">443, 80</span></div>
+              <div class="scan-row"><span>Exposed services</span><span style="color:var(--t2)">None</span></div>
+              <div class="scan-row"><span>Vulnerabilities</span><span style="color:var(--t2)">0</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="slabel" style="margin-bottom:8px">AI Summary</div>
+        <div class="ai-box" style="margin-bottom:0">
+          <strong>AI:</strong> All three surface scans complete. No critical exposures detected. Patching cadence flagged at B+ (SecurityScorecard: 79/100) — noted for questionnaire follow-up. Public disclosure posture is strong. No action required from this phase.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHASE 1: Trust Center Discovery ── -->
+    <div class="phase-view" id="pv1">
+      <div class="ph">
+        <div class="ph-row"><div class="ph-title">Trust Center Discovery</div><span class="badge complete">COMPLETE</span></div>
+        <div class="ph-desc">Trust center documents, certifications, and compliance reports — 5 collected, 1 via outreach</div>
+        <div class="ph-meta">
+          <div class="ph-meta-item"><strong>5</strong> collected</div>
+          <div class="ph-meta-item" style="color:var(--t2)"><strong>1</strong> obtained via outreach · NDA signed</div>
+          <div class="ph-meta-item" style="color:var(--amber)">1 sub-processor list pending review</div>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="slabel" style="margin-bottom:10px">Documents</div>
+        <div class="doc-list">
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">SOC 2 Type II Report <span class="chip">twilio.com/trust-center</span></div><div class="dsub">Bridge Letter, Dec 2024 · Security, Availability, Confidentiality · <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)">Collected Mar 12, 2025</span></div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Collected</div></div>
+          </div>
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">ISO 27001 Certificate <span class="chip">twilio.com/trust-center</span></div><div class="dsub">BSI, valid 2026 · All production infrastructure in scope · <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)">Collected Mar 12, 2025</span></div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Collected</div></div>
+          </div>
+          <div class="doc-row bl-amber" onclick="toggleExp(this)" tabindex="0" role="button" aria-expanded="false" aria-label="Penetration Test Report — NDA signed, under review. Click to expand details.">
+            <div class="dot amber" aria-hidden="true"></div>
+            <div class="db">
+              <div class="dname">Penetration Test Report <span class="chip">twilio.com/trust-center</span> <span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:var(--green-d);border:1px solid var(--green-r);color:var(--brand);font-family:'IBM Plex Mono',monospace">NDA SIGNED</span></div>
+              <div class="dsub" style="color:var(--amber)">NDA signed via DocuSign · Q1 2024 report obtained via Round 1 outreach · Under review in Response Review · <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)">Obtained Mar 15, 2025</span></div>
+              <div class="expand"><div class="expand-inner">
+                <div class="ai-box"><strong>AI:</strong> Report obtained after mutual NDA signature (DocuSign, Mar 2025). Q1 2024 — 14 months old at time of review. 1 high finding open: API key exposure in error responses. Twilio states fix shipped in v3.4.1 but no verification evidence provided. Flagged for analyst decision in Response Review.</div>
+              </div></div>
+            </div>
+            <div class="dr"><div class="dstatus amber"><i data-lucide="clock" style="width:11px;height:11px"></i> Under Review</div><span class="expand-chevron">›</span></div>
+          </div>
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">PCI DSS AOC <span class="chip">twilio.com/trust-center</span></div><div class="dsub">Service Provider Level 1, current · <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)">Collected Mar 12, 2025</span></div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Collected</div></div>
+          </div>
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">HIPAA BAA Template <span class="chip">twilio.com/trust-center</span></div><div class="dsub">Standard BAA available, customizable for enterprise · <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)">Collected Mar 12, 2025</span></div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Collected</div></div>
+          </div>
+          <div class="doc-row bl-amber">
+            <div class="dot amber"></div>
+            <div class="db"><div class="dname">Sub-processor List <span class="chip">twilio.com/legal</span></div><div class="dsub">AWS, GCP, Salesforce — last updated Jan 2025, review recommended · <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--t3)">Collected Mar 12, 2025</span></div></div>
+            <div class="dr"><div class="dstatus amber"><i data-lucide="clock" style="width:11px;height:11px"></i> Review</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHASE 2: Public Registry ── -->
+    <div class="phase-view" id="pv2">
+      <div class="ph">
+        <div class="ph-row"><div class="ph-title">Public Registry & Screening</div><span class="badge complete">COMPLETE</span></div>
+        <div class="ph-desc">SEC filings, sanctions, adverse media, and watchlist screening — clear, 1 historical incident</div>
+        <div class="ph-meta">
+          <div class="ph-meta-item" style="color:var(--brand)"><strong>4</strong> clear</div>
+          <div class="ph-meta-item" style="color:var(--amber)"><strong>1</strong> historical incident (remediated)</div>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="slabel" style="margin-bottom:10px">Screening Results</div>
+        <div class="doc-list">
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">SEC EDGAR — TWLO 10-K Filing (2025) <span class="chip">SEC EDGAR</span></div><div class="dsub">No material cybersecurity disclosures beyond 2022 incident</div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Filed</div></div>
+          </div>
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">OFAC Sanctions Screening <span class="chip">OFAC SDN List</span></div><div class="dsub">No matches for Twilio Inc. or key executives</div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Clear</div></div>
+          </div>
+          <div class="doc-row bl-amber" onclick="toggleExp(this)" tabindex="0" role="button" aria-expanded="false" aria-label="Adverse Media Scan — historical incident flagged. Click to expand details.">
+            <div class="dot amber" aria-hidden="true"></div>
+            <div class="db">
+              <div class="dname">Adverse Media Scan <span class="hist-tag">HISTORICAL</span> <span class="chip">Twilio Blog</span> <span class="chip">The Verge</span></div>
+              <div class="dsub" style="color:var(--amber)">Aug 2022: Employee phishing attack, ~130 customers affected. Remediated.</div>
+              <div class="expand"><div class="expand-inner">
+                <div class="rev-flag" style="margin-bottom:8px">
+                  <div class="rev-flag-icon"><i data-lucide="alert-triangle" style="width:15px;height:15px"></i></div>
+                  <div class="rev-flag-text">August 2022 phishing incident — ~130 customer accounts briefly accessed. Twilio has since mandated hardware security keys for all employees. Fully remediated and disclosed in 2023 10-K filing.</div>
+                </div>
+                <div class="ai-box"><strong>AI:</strong> Historical only. No ongoing risk. Recommend noting in final report as remediated incident.</div>
+              </div></div>
+            </div>
+            <div class="dr"><div class="dstatus amber"><i data-lucide="alert-triangle" style="width:11px;height:11px"></i> Flagged</div><span class="expand-chevron">›</span></div>
+          </div>
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">PEP & Watchlist Screening <span class="chip">Dow Jones</span></div><div class="dsub">No politically exposed persons associated with Twilio leadership</div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Clear</div></div>
+          </div>
+          <div class="doc-row bl-green">
+            <div class="dot green"></div>
+            <div class="db"><div class="dname">Litigation Database <span class="chip">PACER</span></div><div class="dsub">No active cybersecurity-related litigation</div></div>
+            <div class="dr"><div class="dstatus green"><i data-lucide="check" style="width:11px;height:11px;stroke-width:2.5"></i> Clear</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHASE 3: Pre-filling Questionnaire ── -->
+    <div class="phase-view" id="pv3">
+      <div class="ph">
+        <div class="ph-row"><div class="ph-title">Pre-filling Questionnaire</div><span class="badge incomplete">INCOMPLETE</span></div>
+        <div class="ph-desc">Evidence mapped to questionnaire controls — 76% auto-filled, 44 questions remaining</div>
+        <div class="ph-meta">
+          <div class="ph-meta-item"><strong>142</strong> of 186 questions filled</div>
+          <div class="ph-meta-item" style="color:var(--amber)"><strong>44</strong> remaining · in vendor bundle</div>
+        </div>
+      </div>
+      <div class="pc">
+        <div class="q-hero">
+          <div>
+            <div class="q-big">142<em>/186</em></div>
+            <div style="font-size:11.5px;color:var(--t3);margin-top:4px">questions auto-filled from evidence</div>
+          </div>
+          <div class="q-remaining">44 remaining → vendor bundle</div>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:76%"></div></div>
+        <div class="slabel" style="margin-bottom:12px">Coverage by Section</div>
+        <div class="bar-rows">
+          <div class="bar-row" role="row" aria-label="Access Control: 20 of 22 questions filled (91%)"><div class="bar-name" aria-hidden="true">Access Control</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:91%"></div></div><div class="bar-count">20/22</div></div>
+          <div class="bar-row" role="row" aria-label="Data Protection: 18 of 22 questions filled (82%)"><div class="bar-name" aria-hidden="true">Data Protection</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:82%"></div></div><div class="bar-count">18/22</div></div>
+          <div class="bar-row" role="row" aria-label="Incident Response: 17 of 22 questions filled (77%)"><div class="bar-name" aria-hidden="true">Incident Response</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:77%"></div></div><div class="bar-count">17/22</div></div>
+          <div class="bar-row" role="row" aria-label="Business Continuity: 9 of 19 questions filled (47%) — low coverage"><div class="bar-name" aria-hidden="true">Business Continuity</div><div class="bar-track" aria-hidden="true"><div class="bar-fill red" style="width:47%"></div></div><div class="bar-count">9/19</div></div>
+          <div class="bar-row" role="row" aria-label="Network Security: 16 of 18 questions filled (89%)"><div class="bar-name" aria-hidden="true">Network Security</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:89%"></div></div><div class="bar-count">16/18</div></div>
+          <div class="bar-row" role="row" aria-label="Vulnerability Management: 15 of 17 questions filled (88%)"><div class="bar-name" aria-hidden="true">Vulnerability Mgmt</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:88%"></div></div><div class="bar-count">15/17</div></div>
+          <div class="bar-row" role="row" aria-label="HR Security: 8 of 14 questions filled (57%) — low coverage"><div class="bar-name" aria-hidden="true">HR Security</div><div class="bar-track" aria-hidden="true"><div class="bar-fill red" style="width:57%"></div></div><div class="bar-count">8/14</div></div>
+          <div class="bar-row" role="row" aria-label="Vendor Management: 9 of 15 questions filled (60%) — partial coverage"><div class="bar-name" aria-hidden="true">Vendor Management</div><div class="bar-track" aria-hidden="true"><div class="bar-fill amber" style="width:60%"></div></div><div class="bar-count">9/15</div></div>
+          <div class="bar-row" role="row" aria-label="Physical Security: 8 of 9 questions filled (89%)"><div class="bar-name" aria-hidden="true">Physical Security</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:89%"></div></div><div class="bar-count">8/9</div></div>
+          <div class="bar-row" role="row" aria-label="Change Management: 13 of 16 questions filled (81%)"><div class="bar-name" aria-hidden="true">Change Management</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:81%"></div></div><div class="bar-count">13/16</div></div>
+          <div class="bar-row" role="row" aria-label="Compliance: 9 of 12 questions filled (75%) — partial coverage"><div class="bar-name" aria-hidden="true">Compliance</div><div class="bar-track" aria-hidden="true"><div class="bar-fill amber" style="width:75%"></div></div><div class="bar-count">9/12</div></div>
+        </div>
+        <div class="btn-row" style="margin-top:20px">
+          <button class="btn-p" aria-label="Self-serve AI fill — automatically fill remaining questions using AI"><i data-lucide="zap" style="width:13px;height:13px"></i> Self-serve AI Fill</button>
+          <button class="btn-s" aria-label="Request remaining questions from vendor"><i data-lucide="mail" style="width:13px;height:13px"></i> Request from Vendor</button>
+          <button class="btn-s" aria-label="Download questionnaire"><i data-lucide="download" style="width:13px;height:13px"></i> Download</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHASE 4: Vendor Outreach ── -->
+    <div class="phase-view" id="pv4">
+      <div class="ph">
+        <div class="ph-row"><div class="ph-title">Vendor Outreach</div><span class="badge draft" id="p4-badge">DRAFT</span></div>
+        <div class="ph-desc" id="p4-desc">AI has compiled gaps into a bundle — review and send to vendor</div>
+        <div class="ph-meta">
+          <div class="ph-meta-item"><strong>5</strong> items compiled</div>
+          <div class="ph-meta-item" style="color:var(--t3)">security@twilio.com</div>
+          <div class="ph-meta-item" style="color:var(--amber)">Round 2 · Response window: 14 days</div>
+        </div>
+      </div>
+      <div class="pc">
+
+        <div class="bundle-card">
+          <div class="bundle-header">
+            <div>
+              <div class="bundle-title">Vendor Follow-up Bundle</div>
+              <div class="bundle-sub">4 document requests + 1 questionnaire (44 Qs) → security@twilio.com · Round 2</div>
+            </div>
+            <span class="badge draft">DRAFT</span>
+          </div>
+          <div class="bundle-items">
+            <div class="bundle-item">
+              <div class="bi-check" data-idx="0" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+              <div class="bi-body">
+                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Penetration Test Report</div>
+                <div class="bi-sub">NDA-gated on twilio.com/en-us/trust-center — access requires signed mutual NDA</div>
+              </div>
+              <button class="bi-edit">Edit</button>
+            </div>
+            <div class="bundle-item">
+              <div class="bi-check" data-idx="1" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+              <div class="bi-body">
+                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>BC/DR Test Report</div>
+                <div class="bi-sub">BCP available but no DR test evidence found in trust center or SOC 2</div>
+              </div>
+              <button class="bi-edit">Edit</button>
+            </div>
+            <div class="bundle-item">
+              <div class="bi-check" data-idx="2" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+              <div class="bi-body">
+                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Cyber Insurance Certificate</div>
+                <div class="bi-sub">Not available on twilio.com/en-us/trust-center or SEC filings</div>
+              </div>
+              <button class="bi-edit">Edit</button>
+            </div>
+            <div class="bundle-item">
+              <div class="bi-check" data-idx="3" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+              <div class="bi-body">
+                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Vulnerability Scan Results</div>
+                <div class="bi-sub">SOC 2 references quarterly scans but standalone report not provided</div>
+              </div>
+              <button class="bi-edit">Edit</button>
+            </div>
+            <div class="bundle-item">
+              <div class="bi-check" data-idx="4" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+              <div class="bi-body">
+                <div class="bi-name"><span class="badge q" style="margin-right:6px">QUESTIONNAIRE</span>Questionnaire (44 remaining questions)</div>
+                <div class="bi-sub">76% auto-filled from SOC 2, trust center, and scans — 44 Qs need Twilio input</div>
+              </div>
+              <button class="bi-edit">Edit</button>
+            </div>
+          </div>
+          <div class="countdown-row">
+            <div class="countdown-label">Auto-sends if not sent manually in:</div>
+            <div class="countdown-timer" id="countdown" aria-live="off" aria-label="Auto-send countdown timer">1h 58m 43s</div>
+          </div>
+          <div style="padding:8px 16px;border-top:1px solid var(--border-s)">
+            <button onclick="toggleEmail()" aria-expanded="false" aria-controls="email-preview" style="font-size:11px;font-weight:500;color:var(--t3);background:none;border:none;cursor:pointer;padding:0;font-family:'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:5px" id="email-toggle-btn">
+              <i data-lucide="eye" style="width:12px;height:12px"></i><span>Preview email draft</span>
+            </button>
+            <div class="email-preview" id="email-preview">
+              <div class="email-header">
+                <div class="email-field"><span class="email-field-label">To:</span> security@twilio.com</div>
+                <div class="email-field"><span class="email-field-label">From:</span> assessments@acmecorp.com (via Zania)</div>
+                <div class="email-field"><span class="email-field-label">Subject:</span> Third-Party Risk Assessment — Follow-up Request (Round 2) — Acme Corp × Twilio</div>
+              </div>
+              <div class="email-body">Hi Twilio Security Team,
+
+As part of our ongoing third-party risk management process, we are conducting a security assessment of Twilio. Our AI-assisted review has identified 5 items requiring additional evidence or clarification.
+
+Please provide the following by <strong>Mar 28, 2025</strong>:
+
+  1. Penetration Test Report (current, &lt;12 months) — previous report dated Q1 2024 is outside our recency policy. NDA already on file.
+  2. BC/DR Test Report — including RTO/RPO results from most recent DR test.
+  3. Cyber Insurance Certificate — current policy with coverage limits.
+  4. Vulnerability Scan Results — most recent quarterly scan report with finding summary.
+  5. Questionnaire (44 questions) — attached. Sections requiring your input are highlighted.
+
+Please upload documents to our secure portal or reply directly to this email.
+
+Questions? Contact assessments@acmecorp.com.
+
+This request was compiled and dispatched by Zania's autonomous TPRM agent on behalf of Acme Corp.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE A: draft — send button -->
+        <div id="p4-draft" class="send-cta-wrap">
+          <div style="display:flex;gap:8px">
+            <button class="btn-send-all" id="send-all-btn" onclick="sendBundle('all')" style="flex:1">
+              <i data-lucide="send" style="width:15px;height:15px"></i>
+              <span id="send-all-label">Send All (5)</span>
+            </button>
+            <button id="send-selected-btn" onclick="sendBundle('selected')" disabled
+              style="flex:none;padding:10px 14px;font-size:12px;font-weight:600;font-family:'IBM Plex Sans',sans-serif;
+                     background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--t3);
+                     cursor:not-allowed;opacity:.45;transition:all .15s">
+              Send Selected (<span id="send-selected-count">5</span>)
+            </button>
+          </div>
+          <div class="btn-skip" style="cursor:default;color:var(--t3);text-align:center;margin-top:8px;font-size:11px">
+            Or let the timer auto-send in <span style="font-family:'IBM Plex Mono',monospace;color:var(--t2)">1h 58m 43s</span>
+          </div>
+        </div>
+
+        <!-- STATE B: sending spinner -->
+        <div id="p4-sending" style="display:none;align-items:center;gap:12px;padding:20px 16px;border-top:1px solid var(--border-s)">
+          <div class="spinner" style="width:16px;height:16px;border-width:2px;border-color:rgba(74,222,128,.2);border-top-color:var(--brand)"></div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--brand)">Sending bundle to security@twilio.com…</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">Encrypting + dispatching via Zania secure relay</div>
+          </div>
+        </div>
+
+        <!-- STATE C: waiting for vendor + View Responses CTA -->
+        <div id="p4-waiting" style="display:none;border-top:1px solid var(--border-s)">
+          <!-- Sent confirmation row — matches reference design -->
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface)">
+            <div style="width:32px;height:32px;border-radius:7px;background:var(--green-d);border:1px solid var(--green-r);display:flex;align-items:center;justify-content:center;color:var(--brand);flex-shrink:0">
+              <i data-lucide="check" style="width:16px;height:16px;stroke-width:2.5"></i>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13.5px;font-weight:700;color:var(--t1)">Follow-ups sent to vendor</div>
+              <div style="font-size:11.5px;color:var(--t3);margin-top:2px">Sent to security@twilio.com · just now</div>
+            </div>
+            <span class="badge sent" style="flex-shrink:0">SENT</span>
+          </div>
+          <!-- Dispatch detail row -->
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--border-s);background:var(--panel)">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--green-d);border:1px solid var(--green-r);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i data-lucide="check" style="width:11px;height:11px;color:var(--brand);stroke-width:3"></i>
+            </div>
+            <span style="font-size:12.5px;color:var(--t2)">5 items dispatched · Auto-escalation active <span style="color:var(--t3)">(reminder Day 3, escalate Day 7)</span></span>
+          </div>
+          <!-- Waiting state -->
+          <div id="p4-waiting-spinner" style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--border-s)">
+            <div class="spinner" style="width:11px;height:11px;border-width:1.5px;border-color:rgba(126,142,176,.25);border-top-color:var(--neutral);flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--t3)">Waiting for Twilio to respond — expected by <span style="color:var(--t2);font-family:'IBM Plex Mono',monospace;font-size:11px">Mar 28, 2025</span></span>
+          </div>
+          <!-- View Responses CTA — revealed after vendor responds -->
+          <div id="p4-view-cta" style="display:none;padding:12px 16px;border-top:1px solid var(--border-s);background:var(--panel)">
+            <div style="font-size:11.5px;color:var(--brand);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+              <i data-lucide="check-circle-2" style="width:13px;height:13px"></i> Twilio has responded — 5 items received
+            </div>
+            <button class="btn-send-all" onclick="go(5)" style="background:var(--card);border:1px solid var(--border);color:var(--t1)">
+              View Responses → Phase 6
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PHASE 5: Vendor Response Review ── -->
+    <div class="phase-view" id="pv5" style="flex:1;min-height:0">
+      <div class="ph" style="flex-shrink:0;border-bottom:1px solid var(--border)">
+        <div class="ph-row">
+          <div class="ph-title">Vendor Response Review</div>
+          <span class="badge review" id="review-badge">3 AWAITING REVIEW</span>
+        </div>
+        <div class="ph-meta" style="margin-top:6px">
+          <div class="ph-meta-item" style="color:var(--red)"><strong id="review-count-meta">3</strong> awaiting your review</div>
+          <div class="ph-meta-item" style="color:var(--amber)"><strong>12</strong> pending vendor</div>
+          <div class="ph-meta-item" style="color:var(--brand)"><strong>4</strong> resolved</div>
+          <div class="ph-meta-item" style="color:var(--t3)">19 total · security@twilio.com · Round 2</div>
+        </div>
+      </div>
+      <!-- ── SPLIT PANE ── -->
+      <div style="display:flex;flex:1;min-height:0;overflow:hidden">
+
+        <!-- LEFT: Query list -->
+        <div style="width:272px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)">
+
+          <!-- Filter tabs -->
+          <div class="p5-tabs">
+            <button class="p5-tab active" id="tab-all" onclick="p5Filter('all')">All <span class="p5-cnt" id="tc-all">19</span></button>
+            <button class="p5-tab" id="tab-me" onclick="p5Filter('me')">Review <span class="p5-cnt" id="tc-me" style="background:rgba(239,68,68,.15);color:var(--red)">3</span></button>
+            <button class="p5-tab" id="tab-pending" onclick="p5Filter('pending')">Awaiting <span class="p5-cnt" id="tc-pending">12</span></button>
+            <button class="p5-tab" id="tab-done" onclick="p5Filter('done')">Resolved <span class="p5-cnt" id="tc-done" style="background:var(--green-d);color:var(--brand)">4</span></button>
+          </div>
+          <!-- Bulk action bar (contextual) -->
+          <div class="p5-bulk" id="p5-bulk">
+            <span class="p5-bulk-label" id="p5-bulk-label"></span>
+            <button class="p5-bulk-btn" id="p5-bulk-btn" onclick="p5BulkAction()"></button>
+          </div>
+
+          <!-- Query list -->
+          <div style="flex:1;overflow-y:auto" id="p5-list">
+            <div class="p5-group-lbl" data-filter="me all">Awaiting Your Review</div>
+            <div class="p5-item active" id="pi-0" data-filter="me all" onclick="p5Select(0)" tabindex="0">
+              <div class="p5-dot" style="background:var(--red)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Penetration Test Report</div><div class="p5-imeta"><span class="p5-rnd">R2</span><span class="p5-tp">DOC</span><span class="p5-ag" style="color:var(--red)">Flagged · outdated</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item" id="pi-1" data-filter="me all" onclick="p5Select(1)" tabindex="0">
+              <div class="p5-dot" style="background:var(--red)"></div>
+              <div class="p5-ibody"><div class="p5-iname">BC/DR Test Report</div><div class="p5-imeta"><span class="p5-rnd">R2</span><span class="p5-tp">DOC</span><span class="p5-ag" style="color:var(--amber)">RTO gap</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item" id="pi-2" data-filter="me all" onclick="p5Select(2)" tabindex="0">
+              <div class="p5-dot" style="background:var(--red)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Questionnaire — 3 Contradictions</div><div class="p5-imeta"><span class="p5-rnd">R2</span><span class="p5-tp">Q</span><span class="p5-ag" style="color:var(--red)">SOC 2 conflicts</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+
+            <div class="p5-group-lbl" data-filter="pending all">Pending Vendor Response</div>
+            <div class="p5-item" id="pi-3" data-filter="pending all" onclick="p5Select(3)" tabindex="0">
+              <div class="p5-dot" style="background:var(--amber)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Data Retention Policy</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">Q</span><span class="p5-ag">Sent 2d ago</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item" id="pi-4" data-filter="pending all" onclick="p5Select(4)" tabindex="0">
+              <div class="p5-dot" style="background:var(--amber)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Sub-processor SLA Agreements</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">DOC</span><span class="p5-ag">Sent 2d ago</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item" id="pi-5" data-filter="pending all" onclick="p5Select(5)" tabindex="0">
+              <div class="p5-dot" style="background:var(--amber)"></div>
+              <div class="p5-ibody"><div class="p5-iname">HR Security Training Records</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">DOC</span><span class="p5-ag">Sent 2d ago</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item" id="pi-6" data-filter="pending all" onclick="p5Select(6)" tabindex="0">
+              <div class="p5-dot" style="background:var(--amber)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Encryption Key Management</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">Q</span><span class="p5-ag">Sent 2d ago</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item" id="pi-7" data-filter="pending all" onclick="p5Select(7)" tabindex="0">
+              <div class="p5-dot" style="background:var(--amber)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Change Management Process</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">Q</span><span class="p5-ag">Sent 3d ago</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+
+            <div class="p5-group-lbl" data-filter="done all">Resolved</div>
+            <div class="p5-item p5-done" id="pi-8" data-filter="done all" onclick="p5Select(8)" tabindex="0">
+              <div class="p5-dot" style="background:var(--brand)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Cyber Insurance Certificate</div><div class="p5-imeta"><span class="p5-rnd">R2</span><span class="p5-tp">DOC</span><span class="p5-ag" style="color:var(--brand)">AI cleared</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item p5-done" id="pi-9" data-filter="done all" onclick="p5Select(9)" tabindex="0">
+              <div class="p5-dot" style="background:var(--brand)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Vulnerability Scan Results</div><div class="p5-imeta"><span class="p5-rnd">R2</span><span class="p5-tp">DOC</span><span class="p5-ag" style="color:var(--brand)">AI cleared</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item p5-done" id="pi-10" data-filter="done all" onclick="p5Select(10)" tabindex="0">
+              <div class="p5-dot" style="background:var(--brand)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Incident Response Plan</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">DOC</span><span class="p5-ag" style="color:var(--brand)">Accepted</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+            <div class="p5-item p5-done" id="pi-11" data-filter="done all" onclick="p5Select(11)" tabindex="0">
+              <div class="p5-dot" style="background:var(--brand)"></div>
+              <div class="p5-ibody"><div class="p5-iname">Data Classification Policy</div><div class="p5-imeta"><span class="p5-rnd">R1</span><span class="p5-tp">Q</span><span class="p5-ag" style="color:var(--brand)">Accepted</span></div></div>
+              <div class="p5-arr">›</div>
+            </div>
+          </div><!-- /p5-list -->
+
+          <!-- Proceed bar (bottom of left pane) -->
+          <div id="proceed-cta" class="p5-proceed">
+            <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Review all 3 items above — <strong id="proceed-resolved">0</strong>/3 resolved</div>
+            <button class="btn-proceed" id="proceed-btn" disabled onclick="showHandoff()" aria-disabled="true" style="width:100%;padding:9px">Proceed to Risk Assessment →</button>
+          </div>
+
+        </div><!-- /left pane -->
+
+        <!-- RIGHT: Thread view -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)" id="p5-right">
+
+          <!-- THREAD 0: Pen Test (interactive) -->
+          <div class="p5-thread active" id="thread-0">
+            <div class="p5-thd">
+              <div class="p5-thd-dot" style="background:var(--red)"></div>
+              <div style="flex:1;min-width:0">
+                <div class="p5-thd-name">Penetration Test Report <span class="badge doc" style="margin-left:6px">DOC</span></div>
+                <div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--red)">Flagged · High confidence · SOC 2 CC7.2</span></div>
+              </div>
+              <div class="rtl" style="flex-shrink:0"><div class="rn done">R1</div><div class="rc done"></div><div class="rn cur">R2</div></div>
+            </div>
+            <!-- Thread body — id="rev-0" for JS compat -->
+            <div class="p5-tbody" id="rev-0">
+              <span class="rev-name" style="display:none">Penetration Test Report</span>
+              <div class="t-resolved-bar"><i data-lucide="check" style="width:13px;height:13px;stroke-width:2.5"></i> <span class="resolved-label"></span></div>
+              <div class="t-round">
+                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
+                <div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your most recent penetration test report, including scope, methodology, and remediation status for any open findings."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · Attached: pentest_2024_q1.pdf</div><div class="t-in-text">"Please find our latest penetration test report conducted by NCC Group in Q1 2024."</div></div>
+                <div class="ai-box"><strong>AI:</strong> Report is Q1 2024 — 14 months old, outside your 12-month policy. 1 open High finding (CVE-2024-1827) with no fix verification. Flagging for analyst review.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · SOC 2 CC7.2 · ISO 27001 A.12.6.1</div></div>
+              </div>
+              <div class="t-round cur">
+                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
+                <div class="t-out"><div class="t-out-from">Re-requested · security@twilio.com</div><div class="t-out-text">"The Q1 2024 report falls outside our 12-month policy. Please provide a more recent report, or confirm when the next test is scheduled."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"Our Q1 2024 report is the most current available. Next scheduled pen test is Q2 2025. We can provide interim vulnerability scan results as supplementary evidence."</div></div>
+                <div class="ai-box" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)"><strong>AI:</strong> Response does not resolve the gap — same Q1 2024 report, open high finding still unverified. Next test Q2 2025 is 2+ months away.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · <span class="ai-rec">Recommend: re-request or accept with exception note</span></div></div>
+              </div>
+              <div class="note-input-wrap" id="note-wrap-0">
+                <textarea class="note-textarea" id="note-0" placeholder="Add your exception note… (e.g. 'Accepted pending updated report in Q2 2025')"></textarea>
+                <div class="note-btn-row">
+                  <button class="btn-p" style="flex:none;font-size:11px;padding:5px 12px" onclick="submitNote(0)">Submit with note</button>
+                  <button class="btn-s" style="flex:none;font-size:11px;padding:5px 10px" onclick="cancelNote(0)">Cancel</button>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
+                <div class="t-action-btns">
+                  <button class="btn-accept" onclick="resolve(0,'accepted')">Accept</button>
+                  <button class="btn-note" onclick="resolve(0,'accepted-note')">Accept with note</button>
+                  <button class="btn-rereq" onclick="addToQueue(0)">Re-request (R3)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- THREAD 1: BC/DR (interactive) -->
+          <div class="p5-thread" id="thread-1">
+            <div class="p5-thd">
+              <div class="p5-thd-dot" style="background:var(--red)"></div>
+              <div style="flex:1;min-width:0">
+                <div class="p5-thd-name">BC/DR Test Report <span class="badge doc" style="margin-left:6px">DOC</span></div>
+                <div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--amber)">RTO gap · Medium confidence · ISO 27001 A.17.1.2</span></div>
+              </div>
+              <div class="rtl" style="flex-shrink:0"><div class="rn done">R1</div><div class="rc done"></div><div class="rn cur">R2</div></div>
+            </div>
+            <div class="p5-tbody" id="rev-1">
+              <span class="rev-name" style="display:none">BC/DR Test Report</span>
+              <div class="t-resolved-bar"><i data-lucide="check" style="width:13px;height:13px;stroke-width:2.5"></i> <span class="resolved-label"></span></div>
+              <div class="t-round">
+                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
+                <div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your BC/DR test report including RTO and RPO results from the most recent DR exercise."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · Attached: bcdr_test_2024.pdf</div><div class="t-in-text">"Most recent DR exercise: Oct 2024. Achieved RTO of 5.2 hours and RPO of 15 minutes."</div></div>
+                <div class="ai-box"><strong>AI:</strong> RTO of 5.2h exceeds your 4h policy target. RPO within range. DR exercise recent (Oct 2024). Flagging RTO gap for clarification.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf med">Medium confidence</span> · ISO 27001 A.17.1.2 · SOC 2 A1.2</div></div>
+              </div>
+              <div class="t-round cur">
+                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
+                <div class="t-out"><div class="t-out-from">Clarification requested · security@twilio.com</div><div class="t-out-text">"Your RTO of 5.2h exceeds our 4h policy threshold. Please clarify your remediation plan and timeline."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"We acknowledge the gap. Infrastructure upgrade (AWS cross-region active-active) planned Q3 2025. Expected RTO ≤2h post-upgrade. We can provide a remediation commitment letter if needed."</div></div>
+                <div class="ai-box"><strong>AI:</strong> Vendor acknowledges gap and provides a committed remediation timeline (Q3 2025). Risk is a documented exception with a fix date.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf med">Medium confidence</span> · <span class="ai-rec">Recommend: accept with note — remediation timeline provided</span></div></div>
+              </div>
+              <div class="note-input-wrap" id="note-wrap-1">
+                <textarea class="note-textarea" id="note-1" placeholder="Add your exception note… (e.g. 'Accepted — Twilio committed to Q3 2025 remediation, flagged for follow-up')"></textarea>
+                <div class="note-btn-row">
+                  <button class="btn-p" style="flex:none;font-size:11px;padding:5px 12px" onclick="submitNote(1)">Submit with note</button>
+                  <button class="btn-s" style="flex:none;font-size:11px;padding:5px 10px" onclick="cancelNote(1)">Cancel</button>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
+                <div class="t-action-btns">
+                  <button class="btn-accept" onclick="resolve(1,'accepted')">Accept</button>
+                  <button class="btn-note" onclick="resolve(1,'accepted-note')">Accept with note</button>
+                  <button class="btn-rereq" onclick="addToQueue(1)">Re-request (R3)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- THREAD 2: Questionnaire (interactive) -->
+          <div class="p5-thread" id="thread-2">
+            <div class="p5-thd">
+              <div class="p5-thd-dot" style="background:var(--red)"></div>
+              <div style="flex:1;min-width:0">
+                <div class="p5-thd-name">Questionnaire — 3 Contradictions <span class="badge q" style="margin-left:6px">QUESTIONNAIRE</span></div>
+                <div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--red)">SOC 2 conflicts · High confidence · CC6.1, CC7.2</span></div>
+              </div>
+              <div class="rtl" style="flex-shrink:0"><div class="rn done">R1</div><div class="rc done"></div><div class="rn cur">R2</div></div>
+            </div>
+            <div class="p5-tbody" id="rev-2">
+              <span class="rev-name" style="display:none">Questionnaire</span>
+              <div class="t-resolved-bar"><i data-lucide="check" style="width:13px;height:13px;stroke-width:2.5"></i> <span class="resolved-label"></span></div>
+              <div class="t-round">
+                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
+                <div class="t-out"><div class="t-out-from">Questionnaire sent · security@twilio.com · 44 questions</div><div class="t-out-text">"Please complete the attached security questionnaire covering access control, incident response, data handling, and business continuity."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · 41/44 answered</div><div class="t-in-text">"Questionnaire returned — 41 of 44 questions answered. 3 marked 'N/A — see SOC 2 report.'"</div></div>
+                <div class="ai-box"><strong>AI:</strong> 3 contradictions detected vs. SOC 2 Type II: (1) Patch SLA — questionnaire states 95% within 30d, SOC 2 shows 79%; (2) DLP scope — questionnaire includes email, SOC 2 does not; (3) Access review frequency conflict.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · SOC 2 CC6.1, CC7.2 · ISO 27001 A.8.8</div></div>
+              </div>
+              <div class="t-round cur">
+                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
+                <div class="t-out"><div class="t-out-from">Clarification requested · security@twilio.com</div><div class="t-out-text">"We identified 3 discrepancies between your questionnaire responses and SOC 2 report. Please clarify patch SLA compliance rate, DLP scope, and access review frequency."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"(1) 95% is our target; actual was 79% last period due to legacy migration — now resolved. (2) DLP extended to email Jan 2025 post-audit. (3) Privileged accounts: quarterly; standard: annual."</div></div>
+                <div class="ai-box" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)"><strong>AI:</strong> Patch SLA gap (79% vs 95%) is material. DLP extension is unverified post-audit. Access review clarification acceptable. 2 of 3 conflicts remain substantive.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · <span class="ai-rec">Recommend: re-request — conflicts unresolved after R2</span></div></div>
+              </div>
+              <div class="note-input-wrap" id="note-wrap-2">
+                <textarea class="note-textarea" id="note-2" placeholder="Add your exception note… (e.g. 'Accepted — SOC 2 discrepancy noted, vendor to clarify at next review')"></textarea>
+                <div class="note-btn-row">
+                  <button class="btn-p" style="flex:none;font-size:11px;padding:5px 12px" onclick="submitNote(2)">Submit with note</button>
+                  <button class="btn-s" style="flex:none;font-size:11px;padding:5px 10px" onclick="cancelNote(2)">Cancel</button>
+                </div>
+              </div>
+              <div class="t-actions">
+                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept all</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
+                <div class="t-action-btns">
+                  <button class="btn-accept" onclick="resolve(2,'accepted')">Accept all</button>
+                  <button class="btn-note" onclick="resolve(2,'accepted-note')">Accept with note</button>
+                  <button class="btn-rereq" onclick="addToQueue(2)">Re-request (R3)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- THREADS 3–7: Pending vendor (read-only) -->
+          <div class="p5-thread" id="thread-3"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--amber)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Data Retention Policy <span class="badge q" style="margin-left:6px">Q</span></div><div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--amber)">Awaiting vendor response · Sent 2 days ago</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn cur">R1</div></div></div><div class="p5-tbody"><div class="t-round cur"><div class="t-rlbl" style="color:var(--amber)">Round 1 · Mar 15, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">AWAITING VENDOR</span></div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your data retention and deletion policy, including retention periods per data category, deletion procedures, and any exceptions for legal hold."</div></div><div class="t-wait"><div style="width:26px;height:26px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="clock" style="width:12px;height:12px;color:var(--amber)"></i></div><div><div style="font-size:12px;font-weight:500;color:var(--t2)">Waiting for Twilio to respond</div><div style="font-size:10.5px;color:var(--t3);margin-top:2px">Auto-reminder Day 3 · Auto-escalation Day 7</div></div></div></div></div></div>
+
+          <div class="p5-thread" id="thread-4"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--amber)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Sub-processor SLA Agreements <span class="badge doc" style="margin-left:6px">DOC</span></div><div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--amber)">Awaiting vendor response · Sent 2 days ago</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn cur">R1</div></div></div><div class="p5-tbody"><div class="t-round cur"><div class="t-rlbl" style="color:var(--amber)">Round 1 · Mar 15, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">AWAITING VENDOR</span></div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide SLA agreements with your key sub-processors (AWS, GCP, Salesforce) including uptime guarantees and breach notification timelines."</div></div><div class="t-wait"><div style="width:26px;height:26px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="clock" style="width:12px;height:12px;color:var(--amber)"></i></div><div><div style="font-size:12px;font-weight:500;color:var(--t2)">Waiting for Twilio to respond</div><div style="font-size:10.5px;color:var(--t3);margin-top:2px">Auto-reminder Day 3 · Auto-escalation Day 7</div></div></div></div></div></div>
+
+          <div class="p5-thread" id="thread-5"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--amber)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">HR Security Training Records <span class="badge doc" style="margin-left:6px">DOC</span></div><div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--amber)">Awaiting vendor response · Sent 2 days ago</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn cur">R1</div></div></div><div class="p5-tbody"><div class="t-round cur"><div class="t-rlbl" style="color:var(--amber)">Round 1 · Mar 15, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">AWAITING VENDOR</span></div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide evidence of annual security awareness training completion rates for all employees with access to customer data for the past 12 months."</div></div><div class="t-wait"><div style="width:26px;height:26px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="clock" style="width:12px;height:12px;color:var(--amber)"></i></div><div><div style="font-size:12px;font-weight:500;color:var(--t2)">Waiting for Twilio to respond</div><div style="font-size:10.5px;color:var(--t3);margin-top:2px">Auto-reminder Day 3 · Auto-escalation Day 7</div></div></div></div></div></div>
+
+          <div class="p5-thread" id="thread-6"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--amber)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Encryption Key Management <span class="badge q" style="margin-left:6px">Q</span></div><div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--amber)">Awaiting vendor response · Sent 2 days ago</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn cur">R1</div></div></div><div class="p5-tbody"><div class="t-round cur"><div class="t-rlbl" style="color:var(--amber)">Round 1 · Mar 15, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">AWAITING VENDOR</span></div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please describe your encryption key management practices including key rotation schedules, HSM usage, and separation of duties for key custodians."</div></div><div class="t-wait"><div style="width:26px;height:26px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="clock" style="width:12px;height:12px;color:var(--amber)"></i></div><div><div style="font-size:12px;font-weight:500;color:var(--t2)">Waiting for Twilio to respond</div><div style="font-size:10.5px;color:var(--t3);margin-top:2px">Auto-reminder Day 3 · Auto-escalation Day 7</div></div></div></div></div></div>
+
+          <div class="p5-thread" id="thread-7"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--amber)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Change Management Process <span class="badge q" style="margin-left:6px">Q</span></div><div class="p5-thd-meta">Twilio · security@twilio.com · <span style="color:var(--amber)">Awaiting vendor response · Sent 3 days ago · Reminder due today</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn cur">R1</div></div></div><div class="p5-tbody"><div class="t-round cur"><div class="t-rlbl" style="color:var(--amber)">Round 1 · Mar 14, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">AWAITING VENDOR</span></div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please describe your change management process for production systems including approval workflows, testing requirements, and rollback procedures."</div></div><div class="t-wait"><div style="width:26px;height:26px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="clock" style="width:12px;height:12px;color:var(--amber)"></i></div><div><div style="font-size:12px;font-weight:500;color:var(--t2)">Waiting for Twilio to respond</div><div style="font-size:10.5px;color:var(--amber);margin-top:2px">Reminder due today · Auto-escalation Day 7</div></div></div></div></div></div>
+
+          <!-- THREADS 8–11: Resolved (read-only) -->
+          <div class="p5-thread" id="thread-8"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--brand)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Cyber Insurance Certificate <span class="badge doc" style="margin-left:6px">DOC</span></div><div class="p5-thd-meta">Twilio · <span style="color:var(--brand)">AI cleared · No analyst action required</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn done">R1</div><div class="rc done"></div><div class="rn done" style="background:var(--green-d);color:var(--brand);border-color:var(--green-r)">R2 ✓</div></div></div><div class="p5-tbody"><div class="t-round"><div class="t-rlbl">Round 1 · Mar 14, 2025</div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your current cyber insurance certificate including coverage limits, provider, and policy period."</div></div><div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025</div><div class="t-in-text">"Attached: cyber_insurance_cert_2025.pdf — Chubb policy, $10M coverage, valid Dec 2025."</div></div><div class="ai-box" style="border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.05)"><strong>AI:</strong> $10M coverage exceeds your $5M minimum. Chubb. Valid Dec 2025. No cyber exclusions. SOC 2 CC9.2 satisfied. <strong style="color:var(--brand)">Cleared automatically.</strong></div></div><div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--green-d);border:1px solid var(--green-r);border-radius:6px;font-size:12px;font-weight:500;color:var(--brand)"><i data-lucide="check-circle-2" style="width:14px;height:14px"></i>Resolved · AI cleared · Mar 16, 2025</div></div></div>
+
+          <div class="p5-thread" id="thread-9"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--brand)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Vulnerability Scan Results <span class="badge doc" style="margin-left:6px">DOC</span></div><div class="p5-thd-meta">Twilio · <span style="color:var(--brand)">AI cleared · No analyst action required</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn done">R1</div><div class="rc done"></div><div class="rn done" style="background:var(--green-d);color:var(--brand);border-color:var(--green-r)">R2 ✓</div></div></div><div class="p5-tbody"><div class="t-round"><div class="t-rlbl">Round 1 · Mar 14, 2025</div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your most recent vulnerability scan results including critical/high findings and remediation status."</div></div><div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025</div><div class="t-in-text">"Feb 2025 scan: 0 critical, 3 high CVEs — all remediated within 30-day SLA."</div></div><div class="ai-box" style="border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.05)"><strong>AI:</strong> SOC 2 CC7.1 satisfied. All high CVEs remediated within SLA. Last scan Feb 2025. Cross-referenced ISO 27001 A.12.6.1. <strong style="color:var(--brand)">Cleared automatically.</strong></div></div><div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--green-d);border:1px solid var(--green-r);border-radius:6px;font-size:12px;font-weight:500;color:var(--brand)"><i data-lucide="check-circle-2" style="width:14px;height:14px"></i>Resolved · AI cleared · Mar 16, 2025</div></div></div>
+
+          <div class="p5-thread" id="thread-10"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--brand)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Incident Response Plan <span class="badge doc" style="margin-left:6px">DOC</span></div><div class="p5-thd-meta">Twilio · <span style="color:var(--brand)">Accepted by analyst · Mar 16, 2025</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn done" style="background:var(--green-d);color:var(--brand);border-color:var(--green-r)">R1 ✓</div></div></div><div class="p5-tbody"><div class="t-round"><div class="t-rlbl">Round 1 · Mar 14, 2025</div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your incident response plan including escalation procedures, breach notification SLAs, and security team contacts."</div></div><div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025</div><div class="t-in-text">"Attached: ir_plan_2024.pdf — Updated IRP with 72h breach notification SLA, CISO escalation path, 24/7 security contacts."</div></div><div class="ai-box" style="border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.05)"><strong>AI:</strong> 72h breach notification satisfies GDPR Article 33. Escalation path documented. Recommend acceptance.</div></div><div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--green-d);border:1px solid var(--green-r);border-radius:6px;font-size:12px;font-weight:500;color:var(--brand)"><i data-lucide="check-circle-2" style="width:14px;height:14px"></i>Resolved · Accepted by analyst · Mar 16, 2025</div></div></div>
+
+          <div class="p5-thread" id="thread-11"><div class="p5-thd"><div class="p5-thd-dot" style="background:var(--brand)"></div><div style="flex:1;min-width:0"><div class="p5-thd-name">Data Classification Policy <span class="badge q" style="margin-left:6px">Q</span></div><div class="p5-thd-meta">Twilio · <span style="color:var(--brand)">Accepted by analyst · Mar 16, 2025</span></div></div><div class="rtl" style="flex-shrink:0"><div class="rn done" style="background:var(--green-d);color:var(--brand);border-color:var(--green-r)">R1 ✓</div></div></div><div class="p5-tbody"><div class="t-round"><div class="t-rlbl">Round 1 · Mar 14, 2025</div><div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please describe your data classification policy including classification tiers, handling requirements, and enforcement mechanisms."</div></div><div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025</div><div class="t-in-text">"4-tier model (Public/Internal/Confidential/Restricted). Enforced via DLP and mandatory training. Policy updated Jan 2025."</div></div><div class="ai-box" style="border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.05)"><strong>AI:</strong> Comprehensive. Aligns with ISO 27001 A.8.2. 4-tier model with DLP enforcement meets control requirements.</div></div><div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--green-d);border:1px solid var(--green-r);border-radius:6px;font-size:12px;font-weight:500;color:var(--brand)"><i data-lucide="check-circle-2" style="width:14px;height:14px"></i>Resolved · Accepted by analyst · Mar 16, 2025</div></div></div>
+
+          <!-- Re-request queue panel (pinned bottom of right pane) -->
+          <div class="requeue-bundle p5-rq-panel" id="requeue-bundle" style="display:none">
+            <div class="requeue-bundle-hd" style="padding:10px 16px 6px">
+              <i data-lucide="rotate-ccw" style="width:12px;height:12px;color:var(--ctn);flex-shrink:0"></i>
+              <div class="requeue-bundle-hd-title">Re-request Queue — Round 3</div>
+              <span class="requeue-bundle-hd-count" id="requeue-count">0 items</span>
+            </div>
+            <div class="requeue-items" id="requeue-items"></div>
+            <div class="requeue-send-wrap">
+              <div style="font-size:11px;color:var(--t3);margin-bottom:8px">
+                <span id="requeue-count-label">0 items queued for re-request</span>
+                <span style="color:var(--border);margin:0 5px">·</span>
+                <span>dispatched to security@twilio.com as Round 3</span>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn-send-all" id="send-requeue-btn" onclick="sendRequeueBundle()" style="flex:1;padding:9px;font-size:12px">
+                  <i data-lucide="send" style="width:12px;height:12px"></i>
+                  Send Re-requests (<span id="requeue-send-count">0</span>)
+                </button>
+                <button onclick="editRequeueBundle()" style="flex:none;padding:9px 12px;font-size:12px;font-weight:500;font-family:'IBM Plex Sans',sans-serif;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--t2);cursor:pointer;transition:all .12s" onmouseover="this.style.borderColor='var(--t3)'" onmouseout="this.style.borderColor='var(--border)'">Edit Before Sending</button>
+              </div>
+              <div id="requeue-skip" style="display:none;margin-top:10px;text-align:center">
+                <a onclick="showHandoff()" style="font-size:11px;color:var(--t3);text-decoration:underline;cursor:pointer;font-family:'IBM Plex Sans',sans-serif" onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">Skip — Proceed to assessment with current evidence →</a>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /right pane -->
+      </div><!-- /split -->
+
+      <!-- Handoff panel (full-width, shown after proceed) -->
+      <div id="handoff-panel" style="display:none;border-top:1px solid var(--green-r);background:var(--surface);flex-shrink:0">
+        <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--green-d);border:1px solid var(--green-r);display:flex;align-items:center;justify-content:center;color:var(--brand);flex-shrink:0"><i data-lucide="check" style="width:17px;height:17px;stroke-width:2.5"></i></div>
+          <div><div style="font-size:14px;font-weight:600;color:var(--brand)">Evidence Collection complete</div><div style="font-size:11px;color:var(--t3);margin-top:2px">Passing to Risk Assessment · Twilio Inc. · Round 2</div></div>
+        </div>
+        <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;border-bottom:1px solid var(--border)">
+          <div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--brand)">7</div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Docs Collected</div></div>
+          <div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--t1)">142<span style="font-size:12px;color:var(--t3)">/186</span></div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Questions Filled</div></div>
+          <div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--amber)">3</div><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Analyst Decisions</div></div>
+        </div>
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+          <div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px">Analyst Decisions</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.7" id="handoff-decisions">All 3 items reviewed and resolved.</div>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:11.5px;color:var(--t2)">Risk Assessment will evaluate controls against SOC 2, ISO 27001, and your configured framework.</div>
+          <button class="btn-proceed" style="margin-left:16px;white-space:nowrap" onclick="go('risk')">Begin Risk Assessment →</button>
+        </div>
+      </div>
+
+      <!-- Dummy cleared-box stub for JS: old functions reference cleared items — kept hidden -->
+      <div style="display:none">
+        <div id="cleared-stub"></div>
+      </div>
+
+    </div><!-- /pv5 -->
+
+    <!-- ── RISK ASSESSMENT VIEW ── -->
+    <div class="phase-view" id="pv-risk">
+
+      <!-- STATE 1: READY -->
+      <div id="risk-ready">
+        <div class="ph">
+          <div class="ph-row"><div class="ph-title">Risk Assessment · Twilio Inc.</div><span class="badge" style="background:var(--green-d);border:1px solid var(--green-r);color:var(--brand);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px">READY</span></div>
+          <div class="ph-desc">Evidence collection complete — AI is ready to evaluate risk across all collected evidence</div>
+          <div class="ph-meta">
+            <div class="ph-meta-item"><strong>7</strong> docs collected</div>
+            <div class="ph-meta-item"><strong>142</strong>/186 questions filled</div>
+            <div class="ph-meta-item"><strong>3</strong> analyst decisions recorded</div>
+            <div class="ph-meta-item" style="color:var(--t3)">Frameworks: SOC 2 · ISO 27001 · HIPAA · PCI DSS</div>
+          </div>
+        </div>
+        <div class="pc">
+          <div class="slabel" style="margin-bottom:12px">Evidence being assessed</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px">
+              <div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:8px">Documents</div>
+              <div style="font-size:11px;color:var(--t2);line-height:1.7">SOC 2 Type II (Dec 2024)<br>ISO 27001 Certificate<br>PCI DSS AOC<br>HIPAA BAA Template<br>Pen Test Report (Q1 2024)<br>Vulnerability Scan Results<br>Cyber Insurance Certificate</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px">
+              <div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:8px">Analyst Decisions</div>
+              <div style="font-size:11px;color:var(--t2);line-height:1.7">Pen Test — Accepted with note<br>BC/DR Test — Accepted with note<br>Questionnaire — Accepted with note<br><span style="color:var(--t3);font-size:10px">All 3 items flagged in final report</span></div>
+            </div>
+          </div>
+          <div class="ai-box" style="margin-bottom:20px"><strong>AI:</strong> I've reviewed all collected evidence and analyst decisions. I'm ready to evaluate Twilio's risk across 7 dimensions and recommend a risk tier. This will take approximately 10 seconds.</div>
+          <button class="btn-confirm-risk" onclick="startRiskAssessment()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 1v14M1 8h14"/></svg>
+            Begin Risk Assessment
+          </button>
+        </div>
+      </div>
+
+      <!-- STATE 2+3: AI ASSESSMENT → REPORT (streaming chat + progressive reveal) -->
+      <div id="risk-report" style="display:none">
+        <div class="ph">
+          <div class="ph-row">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="ai-dot" id="risk-ai-dot"></div>
+              <div class="ph-title" id="risk-assess-title" aria-live="polite">AI is assessing risk…</div>
+            </div>
+            <span class="badge incomplete" id="risk-assess-badge" role="status" aria-live="polite">PROCESSING</span>
+          </div>
+          <div class="ph-desc" id="risk-assess-desc">Reading through evidence and evaluating across 7 risk dimensions</div>
+          <div class="ph-meta" id="risk-assess-meta" style="display:none">
+            <div class="ph-meta-item" style="color:var(--amber)">Overall score <strong style="font-family:'IBM Plex Mono',monospace">7.3</strong>/10</div>
+            <div class="ph-meta-item"><strong>7</strong> dimensions evaluated</div>
+            <div class="ph-meta-item" style="color:var(--red)"><strong>3</strong> policy gaps identified</div>
+            <div class="ph-meta-item" style="color:var(--t3)">Mar 16, 2025 · Round 2</div>
+          </div>
+        </div>
+        <div class="pc">
+          <div class="risk-two-col">
+
+            <!-- LEFT: Streaming AI chat -->
+            <div class="risk-left">
+              <div class="ai-chat" id="risk-chat" aria-live="polite" aria-label="AI risk assessment messages"></div>
+              <div id="risk-typing" style="display:flex;align-items:center;gap:8px;padding:8px 0;transition:opacity .3s" aria-hidden="true">
+                <div class="ai-chat-avatar"><div class="ai-dot" style="width:6px;height:6px;margin:0"></div></div>
+                <div style="display:flex;gap:5px;align-items:center">
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot" style="animation-delay:.22s"></div>
+                  <div class="typing-dot" style="animation-delay:.44s"></div>
+                </div>
+              </div>
+              <div class="risk-ask-input">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2L7 9"/><path d="M14 2L9 14l-2-5-5-2 12-5z"/></svg>
+                <span style="font-size:11.5px;color:var(--t3);font-style:italic">Ask about the assessment…</span>
+              </div>
+            </div>
+
+            <!-- RIGHT: Progressive reveal — tier → CTA → vendor → dims -->
+            <div class="risk-right">
+              <div id="risk-right-tier" style="opacity:0;transition:opacity .5s ease">
+                <div class="slabel" style="margin-bottom:10px">Select Risk Tier</div>
+                <div class="tier-cards">
+                  <div class="tier-card" onclick="selectTier(this)"><div class="tier-card-label">Tier 1</div><div class="tier-card-name">Low</div><div class="tier-card-sub">Standard review</div></div>
+                  <div class="tier-card" id="tier2-card" onclick="selectTier(this)"><div class="tier-card-label">Tier 2</div><div class="tier-card-name">High</div><div class="tier-badge" id="tier2-badge" style="opacity:0;transition:opacity .4s">AI RECOMMENDED</div></div>
+                  <div class="tier-card" onclick="selectTier(this)"><div class="tier-card-label">Tier 3</div><div class="tier-card-name">Critical</div><div class="tier-card-sub">Executive sign-off</div></div>
+                </div>
+              </div>
+
+              <div id="risk-right-cta" style="opacity:0;transition:opacity .5s ease;margin-top:12px">
+                <button class="btn-confirm-risk" onclick="confirmRisk()">
+                  Confirm Tier 2 → High Risk →
+                </button>
+                <div style="font-size:10.5px;color:var(--t3);text-align:center;margin-top:5px">Sets monitoring cadence and contract review schedule</div>
+              </div>
+
+              <div id="risk-right-vendor" style="opacity:0;transition:opacity .5s ease;margin-top:12px">
+                <div class="vendor-profile">
+                  <div class="vp-name">Twilio Inc.</div>
+                  <div class="vp-row"><span class="vp-key">Category</span><span class="vp-val">Cloud Comms APIs</span></div>
+                  <div class="vp-row"><span class="vp-key">HQ</span><span class="vp-val">San Francisco, CA</span></div>
+                  <div class="vp-row"><span class="vp-key">Revenue</span><span class="vp-val">$2B+</span></div>
+                  <div class="vp-row"><span class="vp-key">Stock</span><span class="vp-val">NYSE: TWLO</span></div>
+                  <div class="vp-row"><span class="vp-key">Founded</span><span class="vp-val">2008</span></div>
+                  <div class="vp-row"><span class="vp-key">Integrations</span><span class="vp-val">AWS · GCP · SFDC</span></div>
+                  <div class="vp-tags">
+                    <span class="risk-tag">HIGH RISK</span>
+                    <span class="reg-tag">HIPAA</span>
+                    <span class="reg-tag">PCI DSS</span>
+                    <span class="reg-tag">GDPR</span>
+                  </div>
+                </div>
+              </div>
+
+              <div id="risk-right-dims" style="opacity:0;transition:opacity .5s ease;margin-top:12px">
+                <div class="slabel" style="margin-bottom:10px">Risk Dimension Scores <span style="float:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);font-weight:600">Avg 7.3</span></div>
+                <div id="risk-dims">
+                  <div class="risk-dim-row"><div class="risk-dim-name">Data Sensitivity</div><div class="risk-dim-track"><div class="risk-dim-fill" style="width:0%" data-w="81%"></div></div><div class="risk-dim-score">8.1</div></div>
+                  <div class="risk-dim-row"><div class="risk-dim-name">Regulatory Exposure</div><div class="risk-dim-track"><div class="risk-dim-fill" style="width:0%" data-w="78%"></div></div><div class="risk-dim-score">7.8</div></div>
+                  <div class="risk-dim-row"><div class="risk-dim-name">Operational Dependency</div><div class="risk-dim-track"><div class="risk-dim-fill" style="width:0%" data-w="79%"></div></div><div class="risk-dim-score">7.9</div></div>
+                  <div class="risk-dim-row"><div class="risk-dim-name">Integration Depth</div><div class="risk-dim-track"><div class="risk-dim-fill amber" style="width:0%" data-w="68%"></div></div><div class="risk-dim-score amber">6.8</div></div>
+                  <div class="risk-dim-row"><div class="risk-dim-name">Geographic Risk</div><div class="risk-dim-track"><div class="risk-dim-fill amber" style="width:0%" data-w="54%"></div></div><div class="risk-dim-score amber">5.4</div></div>
+                  <div class="risk-dim-row"><div class="risk-dim-name">Governance Quality</div><div class="risk-dim-track"><div class="risk-dim-fill amber" style="width:0%" data-w="62%"></div></div><div class="risk-dim-score amber">6.2</div></div>
+                  <div class="risk-dim-row"><div class="risk-dim-name">Incident History</div><div class="risk-dim-track"><div class="risk-dim-fill" style="width:0%" data-w="71%"></div></div><div class="risk-dim-score">7.1</div></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pv-risk -->
+
+  </main><!-- /main -->
+
+    </div><!-- /assessment-body -->
+  </div><!-- /assessment-zone -->
+
+</div><!-- /body -->
+
+<script>
+// ── KEYBOARD ACCESSIBILITY
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const el = e.target;
+    if (el.tagName !== 'BUTTON' && el.tagName !== 'A' && el.getAttribute('tabindex') === '0') {
+      e.preventDefault();
+      el.click();
+    }
+  }
+});
+
+// ── UTILITY
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// Track Phase 5 outreach sent state
+let phase5Sent = false;
+
+// Phase navigation
+function go(idx) {
+  // Gate Phase 6 until Phase 5 is sent
+  if (idx === 5 && !phase5Sent) {
+    go(4); // redirect to outreach
+    return;
+  }
+  document.querySelectorAll('.phase-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.phase-item').forEach(p => {
+    p.classList.remove('active');
+    p.removeAttribute('aria-current');
+  });
+  let viewId, navId;
+  if (idx === 'brief') { viewId = 'pv-brief'; navId = 'pn-brief'; }
+  else if (idx === 'risk') { viewId = 'pv-risk'; navId = 'pn5'; updatePipelineForRisk(true); }
+  else { viewId = 'pv' + idx; navId = 'pn' + idx; updatePipelineForRisk(false); }
+  document.getElementById(viewId).classList.add('active');
+  const navEl = document.getElementById(navId);
+  if (navEl) { navEl.classList.add('active'); navEl.setAttribute('aria-current', 'true'); }
+  const main = document.getElementById('main-content');
+  if (main) main.focus();
+}
+
+function goPhase6FromBrief() {
+  if (phase5Sent) { go(5); } else { go(4); }
+}
+
+function updatePipelineForRisk(active) {
+  const steps = document.querySelectorAll('.pipe-step');
+  // steps[2] = Evidence Collection, steps[3] = Risk Assessment
+  if (steps.length >= 4) {
+    if (active) {
+      steps[2].classList.remove('current'); steps[2].classList.add('done');
+      steps[3].classList.add('current'); steps[3].classList.remove('locked');
+    } else {
+      steps[2].classList.add('current'); steps[2].classList.remove('done');
+      steps[3].classList.remove('current'); steps[3].classList.add('locked');
+    }
+  }
+}
+
+// Expandable doc rows
+function toggleExp(row) {
+  const exp = row.querySelector('.expand');
+  if (exp) {
+    exp.classList.toggle('open');
+    row.classList.toggle('expanded');
+    row.setAttribute('aria-expanded', row.classList.contains('expanded') ? 'true' : 'false');
+  }
+}
+
+// Bundle item selection (Phase 4 — all 5 selected by default)
+let bundleSelected = [true, true, true, true, true];
+
+function toggleBundleItem(el) {
+  const idx = parseInt(el.dataset.idx);
+  bundleSelected[idx] = !bundleSelected[idx];
+  el.classList.toggle('unchecked', !bundleSelected[idx]);
+  updateSendCtas();
+}
+
+function updateSendCtas() {
+  const count = bundleSelected.filter(Boolean).length;
+  const total = bundleSelected.length;
+  const selBtn = document.getElementById('send-selected-btn');
+  const selCount = document.getElementById('send-selected-count');
+  const allLabel = document.getElementById('send-all-label');
+  if (allLabel) allLabel.textContent = `Send All (${total})`;
+  if (selCount) selCount.textContent = count;
+  if (selBtn) {
+    const isPartial = count > 0 && count < total;
+    selBtn.disabled = !isPartial;
+    selBtn.style.opacity = isPartial ? '1' : '.45';
+    selBtn.style.cursor = isPartial ? 'pointer' : 'not-allowed';
+    selBtn.style.color = isPartial ? 'var(--t1)' : 'var(--t3)';
+    selBtn.style.borderColor = isPartial ? 'var(--brand)' : 'var(--border)';
+  }
+}
+
+// Review item resolution
+let resolved = [false, false, false];
+let undoTimers = [null, null, null];
+let requeuedItems = [];
+let queueSent = false;
+
+// AI-drafted re-request messages per review item index
+const requeueDrafts = [
+  "Please share your most recent penetration test report dated within the last 12 months. The Q1 2024 report on file falls outside our recency policy — our NDA is already signed.",
+  "Please provide BC/DR test results including RTO and RPO from your most recent test. Your BCP is on file but DR test evidence is required to complete this assessment.",
+  "44 questions remain in the attached questionnaire. Please complete the highlighted sections — all other responses have been accepted and no further action is needed on those."
+];
+
+// Accept with note — show textarea first
+function resolve(idx, action) {
+  if (action === 'accepted-note') { showNoteInput(idx); return; }
+  if (undoTimers[idx]) { clearTimeout(undoTimers[idx]); undoTimers[idx] = null; }
+  resolved[idx] = action;
+  const item = document.getElementById('rev-' + idx);
+  const label = item.querySelector('.resolved-label');
+  const itemName = item.querySelector('.rev-name').childNodes[0].textContent.trim();
+
+  const actionLabel = action === 'accepted' ? 'Accepted' : 'Accepted';
+  label.innerHTML = `<span style="font-weight:500;color:var(--t1)">${itemName}</span>` +
+    `<span style="color:var(--t3);margin:0 5px">·</span>` +
+    `<span style="color:var(--t2)">${actionLabel}</span>` +
+    `<span class="resolved-undo" onclick="undoResolve(${idx})" style="font-size:10px;color:var(--t3);text-decoration:underline;cursor:pointer;margin-left:8px">Undo</span>`;
+  item.classList.add('resolved');
+  // Update list item to show resolved state
+  const listItem = document.getElementById('pi-' + idx);
+  if (listItem) { listItem.classList.add('p5-done'); listItem.querySelector('.p5-dot').style.background = 'var(--brand)'; }
+  lucide.createIcons();
+  updateProgress();
+  undoTimers[idx] = setTimeout(() => {
+    const u = label.querySelector('.resolved-undo');
+    if (u) u.remove();
+  }, 6000);
+}
+
+// Accept with note — show textarea
+function showNoteInput(idx) {
+  document.getElementById('note-wrap-' + idx).classList.add('open');
+  document.getElementById('note-' + idx).focus();
+}
+function cancelNote(idx) {
+  document.getElementById('note-wrap-' + idx).classList.remove('open');
+}
+function submitNote(idx) {
+  const note = document.getElementById('note-' + idx).value.trim();
+  document.getElementById('note-wrap-' + idx).classList.remove('open');
+  if (undoTimers[idx]) { clearTimeout(undoTimers[idx]); undoTimers[idx] = null; }
+  resolved[idx] = 'accepted-note';
+  const item = document.getElementById('rev-' + idx);
+  const label = item.querySelector('.resolved-label');
+  const itemName = item.querySelector('.rev-name').childNodes[0].textContent.trim();
+  label.innerHTML = `<span style="color:var(--t1);font-weight:500">${itemName}</span>` +
+    `<span style="color:var(--t3);margin:0 5px">·</span>` +
+    `<span style="color:var(--t2)">Accepted with note</span>` +
+    (note ? `<span style="font-size:10px;color:var(--t3);margin-left:6px;font-style:italic">"${note.slice(0,50)}${note.length>50?'…':''}"</span>` : '') +
+    `<span class="resolved-undo" onclick="undoResolve(${idx})" style="font-size:10px;color:var(--t3);text-decoration:underline;cursor:pointer;margin-left:8px">Undo</span>`;
+  item.classList.add('resolved');
+  const listItem2 = document.getElementById('pi-' + idx);
+  if (listItem2) { listItem2.classList.add('p5-done'); listItem2.querySelector('.p5-dot').style.background = 'var(--brand)'; }
+  lucide.createIcons();
+  updateProgress();
+  undoTimers[idx] = setTimeout(() => { const u = label.querySelector('.resolved-undo'); if (u) u.remove(); }, 6000);
+}
+
+// Add to re-request queue
+function addToQueue(idx) {
+  if (resolved[idx]) return; // already resolved
+  requeuedItems.push(idx);
+  resolved[idx] = 'requeued';
+  const item = document.getElementById('rev-' + idx);
+  const label = item.querySelector('.resolved-label');
+  const itemName = item.querySelector('.rev-name').childNodes[0].textContent.trim();
+  label.innerHTML = `<span style="color:var(--t1);font-weight:500">${itemName}</span>` +
+    `<span style="color:var(--t3);margin:0 5px">·</span>` +
+    `<span style="color:var(--ctn);font-weight:500">In re-request queue</span>` +
+    `<span class="resolved-undo" onclick="undoResolve(${idx})" style="font-size:10px;color:var(--t3);text-decoration:underline;cursor:pointer;margin-left:8px">Undo</span>`;
+  item.classList.add('resolved');
+  const listItem3 = document.getElementById('pi-' + idx);
+  if (listItem3) { listItem3.classList.add('p5-done'); listItem3.querySelector('.p5-dot').style.background = 'var(--ctn)'; }
+  lucide.createIcons();
+  // Add to queue bundle UI
+  const bundle = document.getElementById('requeue-bundle');
+  bundle.style.display = 'block';
+  const el = document.createElement('div');
+  el.className = 'queue-item';
+  el.id = 'qi-' + idx;
+  el.style.cssText = 'flex-direction:column;align-items:flex-start;gap:6px;padding:12px 16px';
+  const draft = requeueDrafts[idx] || '';
+  el.innerHTML =
+    `<div style="display:flex;align-items:center;gap:8px;width:100%">` +
+      `<i data-lucide="rotate-ccw" style="width:11px;height:11px;color:var(--ctn);flex-shrink:0"></i>` +
+      `<span style="flex:1;font-size:12.5px;font-weight:500;color:var(--t1)">${itemName}</span>` +
+      `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--ctn-bg);border:1px solid var(--ctn-border);color:var(--ctn);font-family:'IBM Plex Mono',monospace" id="qbadge-${idx}">QUEUED</span>` +
+    `</div>` +
+    `<div style="font-size:11.5px;color:var(--t3);padding-left:19px;line-height:1.55">` +
+      `<span style="color:var(--t4);font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em">AI DRAFT</span> ` +
+      `${draft}` +
+    `</div>` +
+    `<div style="padding-left:19px">` +
+      `<a onclick="removeFromQueue(${idx})" style="font-size:10.5px;color:var(--t3);text-decoration:underline;cursor:pointer;font-family:'IBM Plex Sans',sans-serif" ` +
+        `onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">Remove from queue</a>` +
+    `</div>`;
+  document.getElementById('requeue-items').appendChild(el);
+  const n = requeuedItems.length;
+  const plural = n === 1 ? ' item' : ' items';
+  document.getElementById('requeue-count').textContent = n + plural;
+  document.getElementById('requeue-count-label').textContent = n + plural + ' queued for re-request';
+  document.getElementById('requeue-send-count').textContent = n;
+  lucide.createIcons();
+  updateProgress();
+  undoTimers[idx] = setTimeout(() => { const u = label.querySelector('.resolved-undo'); if (u) u.remove(); }, 6000);
+}
+
+function removeFromQueue(idx) {
+  const qi = requeuedItems.indexOf(idx);
+  if (qi > -1) {
+    requeuedItems.splice(qi, 1);
+    const qiEl = document.getElementById('qi-' + idx);
+    if (qiEl) qiEl.remove();
+    const n = requeuedItems.length;
+    const plural = n === 1 ? ' item' : ' items';
+    document.getElementById('requeue-count').textContent = n + plural;
+    document.getElementById('requeue-count-label').textContent = n + plural + ' queued for re-request';
+    document.getElementById('requeue-send-count').textContent = n;
+    if (n === 0) document.getElementById('requeue-bundle').style.display = 'none';
+  }
+  // un-resolve the item so analyst can re-decide
+  resolved[idx] = false;
+  const item = document.getElementById('rev-' + idx);
+  if (item) {
+    item.classList.remove('resolved', 'expanded');
+    const label = item.querySelector('.resolved-label');
+    if (label) { label.innerHTML = ''; label.onclick = null; }
+    const noteWrap = item.querySelector('.note-input-wrap');
+    if (noteWrap) noteWrap.classList.remove('open');
+  }
+  // Restore list item dot
+  const listItemR = document.getElementById('pi-' + idx);
+  if (listItemR) { listItemR.classList.remove('p5-done'); listItemR.querySelector('.p5-dot').style.background = 'var(--red)'; }
+  document.getElementById('proceed-resolved').textContent = resolved.filter(Boolean).length;
+  document.getElementById('proceed-btn').disabled = true;
+  document.getElementById('review-badge').textContent = '3 AWAITING REVIEW';
+  document.getElementById('review-badge').className = 'badge review';
+  updateProgress();
+}
+
+function editRequeueBundle() {
+  // Placeholder — in a real build this opens an editor modal
+  alert('Edit mode: you can modify each AI-drafted message before sending.');
+}
+
+function sendRequeueBundle() {
+  const btn = document.getElementById('send-requeue-btn');
+  btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-color:rgba(0,0,0,.3);border-top-color:#000;margin-right:6px;display:inline-block"></div>Sending Re-request…';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '✓ Re-request sent — Round 3 active';
+    btn.style.background = '#22C55E';
+    queueSent = true;
+    requeuedItems.forEach(idx => {
+      const b = document.getElementById('qbadge-' + idx);
+      if (b) { b.textContent = 'SENT'; b.style.background = 'var(--green-d)'; b.style.borderColor = 'var(--green-r)'; b.style.color = 'var(--brand)'; }
+      // Update queue item to show "Re-requested · sent just now" + Send Reminder
+      const qi = document.getElementById('qi-' + idx);
+      if (qi) {
+        const itemNameEl = qi.querySelector('span[style*="font-weight:500"]');
+        const itemName = itemNameEl ? itemNameEl.textContent : '';
+        qi.innerHTML =
+          `<div style="display:flex;align-items:center;gap:8px;width:100%">` +
+            `<i data-lucide="check-circle-2" style="width:11px;height:11px;color:var(--brand);flex-shrink:0"></i>` +
+            `<span style="flex:1;font-size:12.5px;font-weight:500;color:var(--t1)">${itemName}</span>` +
+            `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--green-d);border:1px solid var(--green-r);color:var(--brand);font-family:'IBM Plex Mono',monospace">SENT</span>` +
+          `</div>` +
+          `<div style="display:flex;align-items:center;gap:10px;padding-left:19px">` +
+            `<span style="font-size:11.5px;color:var(--t3)">Re-requested · sent just now</span>` +
+            `<button onclick="event.stopPropagation()" style="font-size:10.5px;font-weight:500;color:var(--t2);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif">Send Reminder</button>` +
+          `</div>`;
+        lucide.createIcons();
+      }
+    });
+    // Show skip link
+    document.getElementById('requeue-skip').style.display = 'block';
+    updateProgress();
+  }, 1800);
+}
+
+function toggleResolved(idx) {
+  document.getElementById('rev-' + idx).classList.toggle('expanded');
+}
+
+function undoResolve(idx) {
+  if (undoTimers[idx]) { clearTimeout(undoTimers[idx]); undoTimers[idx] = null; }
+  // Remove from queue if queued
+  const qi = requeuedItems.indexOf(idx);
+  if (qi > -1) {
+    requeuedItems.splice(qi, 1);
+    const qiEl = document.getElementById('qi-' + idx);
+    if (qiEl) qiEl.remove();
+    const n2 = requeuedItems.length;
+    document.getElementById('requeue-count').textContent = n2 + (n2 === 1 ? ' item' : ' items');
+    const cl = document.getElementById('requeue-count-label');
+    if (cl) cl.textContent = n2 + (n2 === 1 ? ' item' : ' items') + ' queued for re-request';
+    const sc = document.getElementById('requeue-send-count');
+    if (sc) sc.textContent = n2;
+    if (n2 === 0) document.getElementById('requeue-bundle').style.display = 'none';
+  }
+  resolved[idx] = false;
+  const item = document.getElementById('rev-' + idx);
+  item.classList.remove('resolved', 'expanded');
+  const label = item.querySelector('.resolved-label');
+  label.innerHTML = ''; label.onclick = null;
+  const noteWrap = item.querySelector('.note-input-wrap');
+  if (noteWrap) noteWrap.classList.remove('open');
+  // Restore list item dot
+  const listItemU = document.getElementById('pi-' + idx);
+  if (listItemU) { listItemU.classList.remove('p5-done'); listItemU.querySelector('.p5-dot').style.background = 'var(--red)'; }
+  document.getElementById('proceed-resolved').textContent = resolved.filter(Boolean).length;
+  document.getElementById('proceed-btn').disabled = true;
+  document.getElementById('review-badge').textContent = '3 AWAITING REVIEW';
+  document.getElementById('review-badge').className = 'badge review';
+}
+
+function updateProgress() {
+  const count = resolved.filter(Boolean).length;
+  const proceedCta = document.getElementById('proceed-cta');
+  const resolvedEl = document.getElementById('proceed-resolved');
+  const btn = document.getElementById('proceed-btn');
+  const hasQueued = requeuedItems.length > 0;
+  const canProceed = count === 3 && (!hasQueued || queueSent);
+
+  // Show proceed bar once any item resolved
+  if (count > 0) proceedCta.classList.add('show');
+
+  if (resolvedEl) resolvedEl.textContent = count;
+
+  if (count === 3 && !canProceed) {
+    if (resolvedEl) resolvedEl.parentElement.innerHTML =
+      'All items reviewed — <strong style="color:var(--ctn)">send re-requests to proceed</strong>';
+  }
+  if (canProceed) {
+    btn.disabled = false;
+    btn.removeAttribute('aria-disabled');
+    document.getElementById('review-badge').textContent = 'ALL REVIEWED';
+    document.getElementById('review-badge').className = 'badge complete';
+    if (document.getElementById('review-count-meta')) document.getElementById('review-count-meta').textContent = '0';
+    document.getElementById('review-nav-sub').textContent = 'All reviewed ✓';
+    document.getElementById('review-nav-sub').className = 'psub green';
+    const doneStep = document.getElementById('pn5').querySelector('.pstep');
+    doneStep.className = 'pstep done';
+    doneStep.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i>';
+    lucide.createIcons();
+    if (resolvedEl) resolvedEl.parentElement.innerHTML = 'All 3 items reviewed — <strong>ready to proceed</strong>';
+  }
+}
+
+function showHandoff() {
+  const decisions = resolved.map((r, i) => {
+    const names = ['Penetration Test Report', 'BC/DR Test Report', 'Questionnaire'];
+    const labels = { 'accepted': 'Accepted', 'accepted-note': 'Accepted with note', 'requeued': 'Added to re-request queue' };
+    return `${names[i]}: ${labels[r] || r}`;
+  }).join(' · ');
+  document.getElementById('handoff-decisions').textContent = decisions;
+  document.getElementById('proceed-cta').classList.remove('show');
+  document.getElementById('handoff-panel').style.display = 'block';
+  document.getElementById('handoff-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── STAT TRACKING ──
+let statAwaiting = 3;
+let statGaps = 19;
+let statCoverage = 76;
+
+function flashStat(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('stat-flash');
+  void el.offsetWidth; // reflow to restart animation
+  el.classList.add('stat-flash');
+}
+
+function updateStats(acceptedIdx, action) {
+  const isAccepted = action !== 'requeued';
+
+  // Awaiting Me: decrements whenever analyst makes a decision on any review item
+  statAwaiting = Math.max(0, statAwaiting - 1);
+  const svA = document.getElementById('sv-awaiting');
+  if (svA) {
+    svA.textContent = statAwaiting;
+    svA.style.color = statAwaiting === 0 ? 'var(--brand)' : 'var(--red)';
+    flashStat('sv-awaiting');
+  }
+
+  // Open Gaps: only decrements when accepted (not re-requested, which stays open)
+  if (isAccepted) {
+    statGaps = Math.max(0, statGaps - 1);
+    const svG = document.getElementById('sv-gaps');
+    if (svG) { svG.textContent = statGaps; flashStat('sv-gaps'); }
+  }
+
+  // Coverage: bumps when questionnaire item (idx 2) is accepted
+  if (isAccepted && acceptedIdx === 2) {
+    statCoverage = 84;
+    const svC = document.getElementById('sv-coverage');
+    if (svC) { svC.textContent = statCoverage + '%'; flashStat('sv-coverage'); }
+    // Also update questionnaire nav sub
+    const qSub = document.getElementById('pn3') && document.getElementById('pn3').querySelector('.psub');
+    if (qSub) qSub.textContent = '84% · resolved';
+  }
+
+  // Update header meta in pv5
+  const awEl = document.querySelector('#pv5 .ph-meta .ph-meta-item strong[style*="red"]');
+  if (awEl) awEl.textContent = statAwaiting;
+  const gpEl = document.getElementById('review-count-meta');
+  if (gpEl) gpEl.textContent = statAwaiting;
+}
+
+// ── LIST ITEM MOVEMENT ──
+function p5MoveToResolved(idx, action) {
+  const listItem = document.getElementById('pi-' + idx);
+  if (!listItem) return;
+
+  const names = ['Penetration Test Report', 'BC/DR Test Report', 'Questionnaire — 3 Contradictions'];
+  const types = ['DOC', 'DOC', 'Q'];
+  const rnds  = ['R2', 'R2', 'R2'];
+  const actionLabel = action === 'requeued' ? 'Re-requested' : action === 'accepted-note' ? 'Accepted w/ note' : 'Accepted';
+  const dotColor = action === 'requeued' ? 'var(--ctn)' : 'var(--brand)';
+  const ageColor = action === 'requeued' ? 'var(--ctn)' : 'var(--brand)';
+
+  listItem.classList.add('p5-item-exiting');
+
+  setTimeout(() => {
+    listItem.remove();
+
+    // Decrement Review tab count
+    const meCnt = document.getElementById('tc-me');
+    if (meCnt) {
+      const cur = parseInt(meCnt.textContent) || 0;
+      meCnt.textContent = Math.max(0, cur - 1);
+    }
+    // Increment Resolved tab count
+    const doneCnt = document.getElementById('tc-done');
+    if (doneCnt) {
+      const cur = parseInt(doneCnt.textContent) || 0;
+      doneCnt.textContent = cur + 1;
+    }
+    // Decrement All tab count if accepted (gaps close)
+    if (action !== 'requeued') {
+      const allCnt = document.getElementById('tc-all');
+      if (allCnt) {
+        const cur = parseInt(allCnt.textContent) || 0;
+        allCnt.textContent = Math.max(0, cur - 1);
+      }
+    }
+
+    // Build new resolved item
+    const newItem = document.createElement('div');
+    newItem.className = 'p5-item p5-done p5-item-entering';
+    newItem.id = 'pi-' + idx;
+    newItem.setAttribute('data-filter', 'done all');
+    newItem.setAttribute('tabindex', '0');
+    newItem.onclick = () => p5Select(idx);
+    newItem.innerHTML =
+      `<div class="p5-dot" style="background:${dotColor}"></div>` +
+      `<div class="p5-ibody">` +
+        `<div class="p5-iname">${names[idx]}</div>` +
+        `<div class="p5-imeta"><span class="p5-rnd">${rnds[idx]}</span><span class="p5-tp">${types[idx]}</span><span class="p5-ag" style="color:${ageColor}">${actionLabel}</span></div>` +
+      `</div>` +
+      `<div class="p5-arr">›</div>`;
+
+    // Insert at top of Resolved group (after group label)
+    const resolvedLbl = document.querySelector('#p5-list .p5-group-lbl[data-filter="done all"]');
+    if (resolvedLbl) {
+      resolvedLbl.insertAdjacentElement('afterend', newItem);
+    } else {
+      document.getElementById('p5-list').appendChild(newItem);
+    }
+
+    // Update bulk action bar
+    p5UpdateBulk();
+
+  }, 260);
+}
+
+// ── BULK ACTIONS ──
+let currentFilter = 'all';
+
+function p5UpdateBulk() {
+  const bulk = document.getElementById('p5-bulk');
+  const label = document.getElementById('p5-bulk-label');
+  const btn = document.getElementById('p5-bulk-btn');
+  if (!bulk || !label || !btn) return;
+
+  const reviewCount = parseInt(document.getElementById('tc-me').textContent) || 0;
+
+  if (currentFilter === 'me' && reviewCount > 0) {
+    label.textContent = `${reviewCount} item${reviewCount > 1 ? 's' : ''} need your decision`;
+    btn.textContent = 'Accept AI Recommendation';
+    bulk.classList.add('show');
+  } else if (currentFilter === 'pending') {
+    label.textContent = '12 items awaiting vendor response';
+    btn.textContent = 'Send Reminder to All';
+    bulk.classList.add('show');
+  } else {
+    bulk.classList.remove('show');
+  }
+}
+
+function p5BulkAction() {
+  if (currentFilter === 'me') {
+    // Auto-accept BC/DR (idx=1) — AI recommends accept-with-note
+    if (!resolved[1]) {
+      resolve(1, 'accepted');
+    }
+    if (!resolved[0] && !resolved[2]) {
+      // Other items need manual review — show message
+      const btn = document.getElementById('p5-bulk-btn');
+      if (btn) { btn.textContent = '1 auto-accepted · 2 need manual review'; btn.style.opacity = '.6'; setTimeout(() => { btn.textContent = 'Accept AI Recommendation'; btn.style.opacity = '1'; }, 2500); }
+    }
+  } else if (currentFilter === 'pending') {
+    const btn = document.getElementById('p5-bulk-btn');
+    if (btn) { btn.textContent = '✓ Reminders sent to Twilio'; btn.style.color = 'var(--brand)'; setTimeout(() => { btn.textContent = 'Send Reminder to All'; btn.style.color = ''; }, 2500); }
+  }
+}
+
+// ── PHASE 5 SPLIT PANE ──
+function p5Select(idx) {
+  document.querySelectorAll('.p5-item').forEach(el => el.classList.remove('active'));
+  const item = document.getElementById('pi-' + idx);
+  if (item) item.classList.add('active');
+  document.querySelectorAll('.p5-thread').forEach(el => el.classList.remove('active'));
+  const thread = document.getElementById('thread-' + idx);
+  if (thread) thread.classList.add('active');
+}
+
+function p5Filter(filter) {
+  document.querySelectorAll('.p5-tab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-' + filter);
+  if (tab) tab.classList.add('active');
+  document.querySelectorAll('#p5-list [data-filter]').forEach(el => {
+    const filters = el.getAttribute('data-filter').split(' ');
+    el.style.display = filters.includes(filter) ? '' : 'none';
+  });
+}
+
+// Send bundle — 3-state flow: draft → sending → waiting → view responses
+function sendBundle(mode) {
+  document.getElementById('p4-draft').style.display = 'none';
+  document.getElementById('p4-sending').style.display = 'flex';
+  const badge = document.getElementById('p4-badge');
+  if (badge) { badge.textContent = 'SENDING'; badge.className = 'badge incomplete'; }
+
+  setTimeout(() => {
+    document.getElementById('p4-sending').style.display = 'none';
+    document.getElementById('p4-waiting').style.display = 'block';
+    if (badge) { badge.textContent = 'SENT'; badge.className = 'badge sent'; }
+    const desc = document.getElementById('p4-desc');
+    if (desc) desc.textContent = 'Bundle dispatched to security@twilio.com — waiting for vendor response';
+    const pn4sub = document.getElementById('pn4-sub');
+    if (pn4sub) { pn4sub.textContent = 'Sent · Waiting on Twilio'; pn4sub.className = 'psub blue'; }
+    phase5Sent = true;
+
+    // After 3.5s, reveal "View Responses" CTA + unlock Phase 6 nav
+    setTimeout(() => {
+      document.getElementById('p4-waiting-spinner').style.display = 'none';
+      const viewCta = document.getElementById('p4-view-cta');
+      viewCta.style.display = 'block';
+      viewCta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      lucide.createIcons();
+
+      // Reveal Phase 6 nav item
+      const pn5 = document.getElementById('pn5');
+      pn5.style.display = 'flex';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        pn5.style.opacity = '1';
+        pn5.style.transform = 'none';
+      }));
+    }, 3500);
+  }, 2500);
+}
+
+// Live countdown
+function startCountdown() {
+  let total = 7123; // seconds
+  setInterval(() => {
+    total--;
+    if (total < 0) return;
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    const t = `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    const el = document.getElementById('countdown');
+    const el2 = document.getElementById('countdown2');
+    if (el) el.textContent = t;
+    if (el2) el2.textContent = t;
+  }, 1000);
+}
+
+// Email preview toggle
+function toggleEmail() {
+  const preview = document.getElementById('email-preview');
+  const btn = document.getElementById('email-toggle-btn');
+  const label = btn.querySelector('span');
+  preview.classList.toggle('open');
+  const isOpen = preview.classList.contains('open');
+  label.textContent = isOpen ? 'Hide email draft' : 'Preview email draft';
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+
+// Expandable cleared items
+function toggleCleared(row) {
+  row.classList.toggle('open');
+  row.setAttribute('aria-expanded', row.classList.contains('open') ? 'true' : 'false');
+}
+
+// Risk Assessment flow — streaming AI chat + progressive right-panel reveal
+function startRiskAssessment() {
+  document.getElementById('risk-ready').style.display = 'none';
+  document.getElementById('risk-report').style.display = 'block';
+
+  const chat = document.getElementById('risk-chat');
+  const typing = document.getElementById('risk-typing');
+
+  const msgs = [
+    "Starting vendor assessment for Twilio. I'm enriching intake data, screening for prior incidents, and profiling the vendor across 7 risk dimensions.",
+    "Twilio profiled — cloud communications platform (SMS, voice, video, email APIs). Processes PII at scale (billions of messages/month): customer routing data, call records, contact info. Financial data in scope: SOC 2, GDPR, HIPAA, PCI DSS. Scoring risk dimensions now.",
+    "I recommend <strong>Tier 2 — High Risk</strong> for Twilio. Key factors: PII at scale, deep API integration (hard to replace), HIPAA + PCI DSS exposure, an open pen test finding, and the 2022 phishing incident. Please review and confirm the tier on the right."
+  ];
+
+  function addMsg(html) {
+    typing.style.opacity = '0';
+    return wait(250).then(() => {
+      const el = document.createElement('div');
+      el.className = 'ai-chat-msg';
+      el.style.cssText = 'opacity:0;transform:translateY(5px);transition:opacity .38s ease,transform .38s ease';
+      el.innerHTML = '<div class="ai-chat-avatar"><div class="ai-dot" style="width:6px;height:6px;margin:0"></div></div><div class="ai-chat-bubble">' + html + '</div>';
+      chat.appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      }));
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+
+  function reveal(id) { document.getElementById(id).style.opacity = '1'; }
+
+  async function run() {
+    // Message 1
+    typing.style.opacity = '1';
+    await wait(1600);
+    await addMsg(msgs[0]);
+
+    await wait(700);
+    typing.style.opacity = '1';
+    await wait(1900);
+    await addMsg(msgs[1]);
+
+    // Tier cards appear after message 2
+    await wait(400);
+    reveal('risk-right-tier');
+
+    await wait(400);
+    typing.style.opacity = '1';
+    await wait(2200);
+    await addMsg(msgs[2]);
+
+    // Tier 2 auto-selected with AI badge
+    await wait(450);
+    document.getElementById('tier2-card').classList.add('selected');
+    document.getElementById('tier2-badge').style.opacity = '1';
+
+    // CTA
+    await wait(200);
+    reveal('risk-right-cta');
+
+    // Vendor profile
+    await wait(350);
+    reveal('risk-right-vendor');
+
+    // Dimension bars
+    await wait(450);
+    reveal('risk-right-dims');
+    await wait(180);
+    document.querySelectorAll('.risk-dim-fill').forEach((fill, i) => {
+      setTimeout(() => { fill.style.width = fill.getAttribute('data-w') || '50%'; }, i * 95);
+    });
+
+    // Update header to report state
+    await wait(300);
+    document.getElementById('risk-assess-title').textContent = 'Risk Assessment Report · Twilio Inc.';
+    document.getElementById('risk-assess-badge').textContent = 'TIER 2 · HIGH RISK';
+    document.getElementById('risk-assess-badge').className = 'badge';
+    document.getElementById('risk-assess-badge').style.cssText = 'background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.14);color:#EF4444;font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px';
+    document.getElementById('risk-assess-desc').textContent = 'AI-generated assessment across 7 risk dimensions · SOC 2 · ISO 27001 · HIPAA · PCI DSS';
+    document.getElementById('risk-assess-meta').style.display = 'flex';
+    document.getElementById('risk-ai-dot').style.display = 'none';
+  }
+
+  run();
+}
+
+function selectTier(card) {
+  document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+function confirmRisk() {
+  const btn = document.querySelector('.btn-confirm-risk');
+  btn.textContent = '✓ Tier 2 · Elevated Risk confirmed — forwarding to Risk Register';
+  btn.style.background = '#22C55E';
+  btn.style.color = '#000';
+  btn.disabled = true;
+  setTimeout(() => {
+    const note = document.createElement('div');
+    note.style.cssText = 'margin-top:12px;padding:10px 14px;background:var(--green-d);border:1px solid var(--green-r);border-radius:6px;font-size:11.5px;color:var(--t2);text-align:center';
+    note.textContent = 'Risk assessment complete. Twilio added to Risk Register with Tier 2 status. Quarterly review scheduled.';
+    btn.parentElement.appendChild(note);
+  }, 600);
+}
+
+// ── AI BRIEFING — steps animate in one by one, scanning → settled
+async function initBriefing() {
+  document.getElementById('pv-brief').classList.add('active');
+  document.getElementById('pn-brief').classList.add('active');
+  document.getElementById('pn-brief').setAttribute('aria-current', 'true');
+
+  // Reveal nav items as each phase step completes (Phase 6 stays hidden until outreach sent)
+  const navIds = ['pn0', 'pn1', 'pn2', 'pn3', 'pn5'];
+  const steps = document.querySelectorAll('#pv-brief .brief-step');
+
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+
+    // Appear with scanning pulse on the timeline dot
+    step.classList.add('scanning', 'visible');
+
+    await wait(850); // scanning duration
+
+    // Settle — remove scanning, the step's own done/attn class takes over
+    step.classList.remove('scanning');
+
+    // Reveal corresponding phase nav item
+    if (navIds[i]) {
+      const navItem = document.getElementById(navIds[i]);
+      if (navItem) {
+        navItem.style.display = 'flex';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          navItem.style.opacity = '1';
+          navItem.style.transform = 'none';
+        }));
+      }
+    }
+
+    await wait(320);
+  }
+
+  // All steps loaded — reveal attention box
+  await wait(300);
+  document.querySelector('#pv-brief .brief-attn-box').classList.add('visible');
+}
+
+// Init
+initBriefing();
+startCountdown();
+lucide.createIcons();
+</script>
+</body>
+</html>
