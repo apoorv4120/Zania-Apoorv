@@ -160,7 +160,17 @@ body{
   padding:12px 14px 8px;font-size:9.5px;font-weight:600;
   letter-spacing:.08em;text-transform:uppercase;color:var(--t3);
   border-bottom:1px solid var(--border-s);flex-shrink:0;
+  display:flex;align-items:center;gap:7px;
 }
+.ec-loader{
+  width:8px;height:8px;border-radius:50%;
+  border:1.5px solid var(--border);
+  border-top-color:var(--brand);
+  animation:ec-spin .7s linear infinite;
+  flex-shrink:0;
+}
+.ec-loader.done{display:none;}
+@keyframes ec-spin{to{transform:rotate(360deg)}}
 .nav-group-label{
   padding:8px 14px 4px;font-size:8.5px;font-weight:700;
   letter-spacing:.12em;text-transform:uppercase;color:var(--t4);
@@ -192,6 +202,7 @@ body{
   display:flex;align-items:center;gap:9px;
   padding:10px 14px;cursor:pointer;
   transition:background .1s;border-left:2px solid transparent;
+  margin-bottom:2px;
 }
 .phase-item:hover{background:var(--card)}
 .phase-item.active{background:var(--card);border-left-color:var(--brand)}
@@ -321,11 +332,21 @@ body{
   border-radius:8px;overflow:hidden;margin-bottom:16px;
 }
 .bundle-header{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  padding:14px 16px 10px;border-bottom:1px solid var(--border-s);
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-bottom:1px solid var(--border-s);
+  cursor:pointer;transition:background .12s;user-select:none;
 }
-.bundle-title{font-size:15px;font-weight:600;color:var(--t1)}
-.bundle-sub{font-size:12px;color:var(--t3);margin-top:3px}
+.bundle-header:not([style*="cursor:default"]):hover{background:rgba(255,255,255,.018)}
+.bundle-card.minimized .bundle-header{border-bottom:none}
+.bundle-card.minimized{opacity:.65;border-color:var(--border-s)}
+.bundle-card.minimized:hover{opacity:.9}
+.bundle-chevron{flex-shrink:0;color:var(--t3);transition:transform .2s ease}
+.bundle-card.minimized .bundle-chevron{transform:rotate(-90deg)}
+.bundle-title{font-size:14px;font-weight:600;color:var(--t1)}
+.bundle-sub{font-size:11.5px;color:var(--t3);margin-top:2px}
+.bundle-sent-meta{display:none;align-items:center;gap:5px;margin-top:3px}
+.bundle-card.minimized .bundle-sent-meta{display:flex}
+.bundle-card.minimized .bundle-sub{display:none}
 .bundle-items{padding:6px 0}
 .bundle-item{
   display:flex;flex-direction:column;
@@ -368,8 +389,6 @@ body{
 .bundle-card.minimized .bundle-items,.bundle-card.minimized #p4-requeue-section,
 .bundle-card.minimized .countdown-row,.bundle-card.minimized #email-toggle-btn,
 .bundle-card.minimized .email-preview{display:none}
-.bundle-sent-summary{display:none;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
-.bundle-card.minimized .bundle-sent-summary{display:flex}
 
 /* Countdown + Send CTA */
 .countdown-row{
@@ -508,7 +527,9 @@ body{
 .pipe-step.current{color:var(--t1);font-weight:600;border-bottom-color:var(--brand)}
 .pipe-step.locked{opacity:.4;cursor:default;pointer-events:none}
 .pipe-check{font-size:11px;color:var(--t3)}
-.pipe-sep{color:var(--t4);font-size:10px;flex-shrink:0}
+.pipe-sep{display:flex;align-items:center;flex-shrink:0;gap:0}
+.pipe-sep::before{content:'';display:block;width:20px;height:1px;background:var(--border)}
+.pipe-sep::after{content:'';display:block;width:0;height:0;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;border-left:4px solid var(--border)}
 
 /* ── NEW ASSESSMENT BUTTON ── */
 .new-assessment-btn{
@@ -536,7 +557,7 @@ body{
 .assessment-body{display:flex;flex:1;overflow:hidden}
 
 /* Phase views */
-.phase-view{display:none;flex-direction:column;height:100%}
+.phase-view{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
 .phase-view.active{display:flex}
 
 /* ── CLEARED ROWS (expandable) ── */
@@ -867,6 +888,67 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
 /* Proceed bar (bottom of left pane) */
 .p5-proceed{padding:10px 12px;border-top:1px solid var(--border);background:var(--surface);display:none}
 .p5-proceed.show{display:block}
+/* ── P5 AI CHAT ── */
+.p5-ai-chat{
+  flex-shrink:0;
+  border-top:2px solid rgba(74,222,128,.3);
+  background:var(--surface);display:flex;flex-direction:column;
+  height:218px;transition:height .2s ease;
+}
+.p5-ai-chat.collapsed{height:36px}
+.p5-ai-chat.collapsed .p5-ai-msgs,.p5-ai-chat.collapsed .p5-ai-input-row{display:none}
+.p5-ai-chat.collapsed #p5-ai-chevron{transform:rotate(180deg)}
+.p5-ai-header{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  padding:7px 14px;border-bottom:1px solid var(--border-s);
+  flex-shrink:0;
+}
+.p5-ai-header-left{display:flex;align-items:center;gap:7px}
+.p5-ai-header-right{display:flex;justify-content:flex-end}
+.p5-ai-header-label{font-size:11px;font-weight:600;color:var(--t2);font-family:'IBM Plex Mono',monospace;letter-spacing:.03em}
+.p5-ai-ctx-label{font-size:10.5px;color:var(--t3);margin-left:2px}
+.p5-ai-msgs{
+  flex:1;overflow-y:auto;padding:10px 14px;
+  display:flex;flex-direction:column;gap:7px;
+  scrollbar-width:none;
+}
+.p5-ai-msgs::-webkit-scrollbar{display:none}
+.p5-ai-msg{display:flex;gap:8px;align-items:flex-start}
+.p5-ai-msg.user{flex-direction:row-reverse}
+.p5-ai-bubble{
+  font-size:12px;line-height:1.55;padding:7px 11px;border-radius:8px;
+  max-width:88%;
+}
+.p5-ai-msg.ai .p5-ai-bubble{background:var(--card);color:var(--t2);border:1px solid var(--border-s)}
+.p5-ai-msg.user .p5-ai-bubble{background:var(--brand-dim);color:var(--t1);border:1px solid var(--brand-ring)}
+.p5-ai-avatar{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  background:var(--green-d);border:1px solid var(--green-r);
+  display:flex;align-items:center;justify-content:center;
+}
+.p5-ai-typing{display:flex;gap:3px;padding:8px 11px;background:var(--card);border:1px solid var(--border-s);border-radius:8px;align-items:center}
+.p5-ai-typing span{width:4px;height:4px;border-radius:50%;background:var(--t3);animation:aiTyping 1.2s ease-in-out infinite}
+.p5-ai-typing span:nth-child(2){animation-delay:.2s}
+.p5-ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes aiTyping{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-3px);opacity:1}}
+.p5-ai-input-row{
+  display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--border-s);
+  flex-shrink:0;
+}
+.p5-ai-input{
+  flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;
+  color:var(--t1);font-size:12px;font-family:'IBM Plex Sans',sans-serif;
+  padding:7px 11px;outline:none;transition:border-color .12s;
+}
+.p5-ai-input::placeholder{color:var(--t4)}
+.p5-ai-input:focus{border-color:var(--brand)}
+.p5-ai-send{
+  flex-shrink:0;background:var(--brand-dim);border:1px solid var(--brand-ring);
+  border-radius:6px;padding:7px 12px;cursor:pointer;
+  color:var(--brand);font-size:11px;font-weight:600;
+  font-family:'IBM Plex Sans',sans-serif;transition:background .12s;
+}
+.p5-ai-send:hover{background:rgba(74,222,128,.14)}
 /* Stat flash animation */
 @keyframes statPop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
 .stat-flash{animation:statPop .35s ease}
@@ -898,10 +980,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
     <span class="act" aria-current="page">Evidence Collection</span>
   </div>
   </nav>
-  <div class="tb-right">
-    <div class="ai-pill" role="status" aria-live="polite" aria-label="AI status: Active, monitoring vendor portal"><div class="ai-dot" aria-hidden="true"></div>AI Active · Monitoring vendor portal</div>
-    <div class="avatar" aria-label="Current user: SG">SG</div>
-  </div>
+  <div class="tb-right"></div>
 </header>
 
 <!-- BODY -->
@@ -994,11 +1073,19 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
     <div class="nav-item" tabindex="0" role="button" aria-label="Settings">
       <div class="nav-icon-wrap">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="8" cy="8" r="2.5"/>
-          <path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/>
+          <path d="M6.5 1.5h3l.4 1.7c.4.2.7.4 1 .6l1.7-.5 1.5 2.5-1.2 1.2c0 .3.1.6.1 1s0 .7-.1 1l1.2 1.2-1.5 2.5-1.7-.5c-.3.2-.6.4-1 .6l-.4 1.7h-3l-.4-1.7c-.4-.2-.7-.4-1-.6l-1.7.5-1.5-2.5 1.2-1.2c0-.3-.1-.6-.1-1s0-.7.1-1L1.5 6l1.5-2.5 1.7.5c.3-.2.6-.4 1-.6l.4-1.7z"/>
+          <circle cx="8" cy="8" r="2.3"/>
         </svg>
       </div>
       <span class="nav-label" aria-hidden="true">Settings</span>
+    </div>
+
+    <!-- User avatar -->
+    <div class="nav-item" style="margin-top:4px;margin-bottom:2px" tabindex="0" role="button" aria-label="User profile: Apoorv Singh">
+      <div class="nav-icon-wrap">
+        <div class="avatar" style="width:24px;height:24px;font-size:9px;border-radius:50%;background:linear-gradient(135deg,#4ADE80,#22C55E);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-family:'IBM Plex Mono',monospace;flex-shrink:0">AS</div>
+      </div>
+      <span class="nav-label" aria-hidden="true" style="font-size:12.5px">Apoorv Singh</span>
     </div>
   </nav>
 
@@ -1008,22 +1095,16 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
     <!-- Pipeline strip — scoped to assessment context only -->
     <nav class="pipeline-strip" aria-label="Assessment pipeline stages" role="navigation">
       <div class="pipe-step done"><span class="pipe-check" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></span> Intake <span class="sr-only">(complete)</span></div>
-      <span class="pipe-sep" aria-hidden="true">›</span>
+      <span class="pipe-sep" aria-hidden="true"></span>
       <div class="pipe-step done"><span class="pipe-check" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></span> Risk Tiering <span class="sr-only">(complete)</span></div>
-      <span class="pipe-sep" aria-hidden="true">›</span>
+      <span class="pipe-sep" aria-hidden="true"></span>
       <div class="pipe-step current" aria-current="step">Evidence Collection</div>
-      <span class="pipe-sep" aria-hidden="true">›</span>
+      <span class="pipe-sep" aria-hidden="true"></span>
       <div class="pipe-step locked" aria-disabled="true">Risk Assessment</div>
-      <span class="pipe-sep" aria-hidden="true">›</span>
+      <span class="pipe-sep" aria-hidden="true"></span>
       <div class="pipe-step locked" aria-disabled="true">Emails</div>
-      <span class="pipe-sep" aria-hidden="true">›</span>
+      <span class="pipe-sep" aria-hidden="true"></span>
       <div class="pipe-step locked" aria-disabled="true">Monitoring</div>
-      <div style="margin-left:auto;padding-left:16px;flex-shrink:0;display:flex;align-items:center;gap:8px;border-left:1px solid var(--border)">
-        <div style="width:56px;height:3px;background:var(--border);border-radius:2px;overflow:hidden">
-          <div id="pipe-progress" style="height:100%;width:40%;background:var(--brand);border-radius:2px;transition:width .5s ease"></div>
-        </div>
-        <span id="pipe-step-label" style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);white-space:nowrap">Step 3 of 6</span>
-      </div>
     </nav>
 
     <!-- Assessment body: phase nav + main content -->
@@ -1032,9 +1113,9 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
   <!-- PHASE NAV -->
   <nav class="phase-nav" id="phase-nav" aria-label="Evidence collection phases">
     <div class="phase-nav-handle" id="phase-nav-handle" title="Drag to resize"></div>
-    <div class="nav-section-label">Evidence Collection</div>
+    <div class="nav-section-label">Evidence Collection<span class="ec-loader" id="ec-loader"></span></div>
     <div class="vendor-card">
-      <div class="vendor-name">Twilio Inc. <span class="tier">TIER 2</span></div>
+      <div class="vendor-name">Twilio Inc.</div>
       <div class="vendor-meta">twilio.com · Communications SaaS</div>
     </div>
     <div class="nav-stats" role="list" aria-label="Evidence collection summary">
@@ -1113,8 +1194,8 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
       </div>
       <div class="pc" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
         <div style="flex:1;margin:0;border:1.5px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px">
-          <div style="font-size:14px;color:var(--t2);font-weight:500;margin-bottom:10px">Select a phase to explore</div>
-          <div style="font-size:12.5px;color:var(--t3);line-height:1.7;max-width:340px">Evidence collection is complete across all 5 phases. Choose any phase in the left panel to review what was gathered.</div>
+          <div style="font-size:14px;color:var(--t2);font-weight:500;margin-bottom:10px">Select evidence to explore</div>
+          <div style="font-size:12.5px;color:var(--t3);line-height:1.7;max-width:340px">Evidence collection is complete across all 5 phases. Choose any evidence type in the left panel to review what was gathered.</div>
         </div>
       </div>
     </div>
@@ -1331,15 +1412,14 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
       </div>
       <div class="pc">
 
-        <div class="bundle-card">
-          <div class="bundle-header">
+        <div class="bundle-card" id="p4-initial-bundle">
+          <div class="bundle-header" style="cursor:default">
             <div style="flex:1;min-width:0">
               <div class="bundle-title">Vendor Outreach Bundle</div>
               <div class="bundle-sub" id="p4-desc">4 document requests + 1 questionnaire (44 Qs) → security@twilio.com</div>
-              <div class="bundle-sent-summary" id="p4-sent-summary">
-                <i data-lucide="check-circle-2" style="width:13px;height:13px;color:var(--brand);flex-shrink:0"></i>
-                <span style="font-size:11.5px;color:var(--t3)">Sent <span style="font-family:'IBM Plex Mono',monospace;color:var(--t2)">Mar 17, 2025</span> · 5 items · security@twilio.com</span>
-                <button onclick="toggleBundleHistory()" style="font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;padding:0;margin-left:auto" id="p4-hist-btn">Show</button>
+              <div class="bundle-sent-meta" id="p4-sent-meta">
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="12" height="12" style="color:var(--brand);flex-shrink:0"><path d="M7 1a6 6 0 100 12A6 6 0 007 1z"/><path d="M4.5 7l2 2 3-3"/></svg>
+                <span style="font-size:11px;color:var(--t3)">Sent <span style="font-family:'IBM Plex Mono',monospace;color:var(--t2)">Mar 17, 2025</span> · 5 items · security@twilio.com</span>
               </div>
             </div>
             <span class="badge draft" id="p4-badge">DRAFT</span>
@@ -1349,7 +1429,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
               <div class="bi-row">
                 <div class="bi-check" data-idx="0" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
                 <div class="bi-body">
-                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Penetration Test Report <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-name">Penetration Test Report <span class="p5-rnd" style="margin-left:6px">R1</span></div>
                   <div class="bi-sub">NDA-gated on twilio.com/en-us/trust-center — access requires signed mutual NDA</div>
                 </div>
                 <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-0')">Edit</button>
@@ -1367,7 +1447,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
               <div class="bi-row">
                 <div class="bi-check" data-idx="1" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
                 <div class="bi-body">
-                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>BC/DR Test Report <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-name">BC/DR Test Report <span class="p5-rnd" style="margin-left:6px">R1</span></div>
                   <div class="bi-sub">BCP available but no DR test evidence found in trust center or SOC 2</div>
                 </div>
                 <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-1')">Edit</button>
@@ -1385,7 +1465,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
               <div class="bi-row">
                 <div class="bi-check" data-idx="2" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
                 <div class="bi-body">
-                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Cyber Insurance Certificate <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-name">Cyber Insurance Certificate <span class="p5-rnd" style="margin-left:6px">R1</span></div>
                   <div class="bi-sub">Not available on twilio.com/en-us/trust-center or SEC filings</div>
                 </div>
                 <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-2')">Edit</button>
@@ -1403,7 +1483,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
               <div class="bi-row">
                 <div class="bi-check" data-idx="3" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
                 <div class="bi-body">
-                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Vulnerability Scan Results <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-name">Vulnerability Scan Results <span class="p5-rnd" style="margin-left:6px">R1</span></div>
                   <div class="bi-sub">SOC 2 references quarterly scans but standalone report not provided</div>
                 </div>
                 <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-3')">Edit</button>
@@ -1421,7 +1501,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
               <div class="bi-row">
                 <div class="bi-check" data-idx="4" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
                 <div class="bi-body">
-                  <div class="bi-name"><span class="badge q" style="margin-right:6px">QUESTIONNAIRE</span>Questionnaire (44 remaining questions)</div>
+                  <div class="bi-name">Questionnaire (44 remaining questions)</div>
                   <div class="bi-sub">76% auto-filled from SOC 2, trust center, and scans — 44 Qs need Twilio input</div>
                 </div>
                 <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-4')">Edit</button>
@@ -1437,8 +1517,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
             </div>
           </div>
           <!-- Re-requested items added from Response Review -->
-          <div id="p4-requeue-section" style="display:none;border-top:1px solid var(--border-s);padding:8px 16px 4px">
-            <div style="font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--ctn);font-family:'IBM Plex Mono',monospace;margin-bottom:6px">RE-REQUESTED FROM REVIEW</div>
+          <div id="p4-requeue-section" style="display:none;border-top:1px solid var(--border-s)">
             <div id="p4-requeue-items"></div>
           </div>
           <div class="countdown-row">
@@ -1543,12 +1622,14 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
         <!-- STATE D: re-request bundle, shown after initial bundle sent -->
         <div id="p4-new-bundle-view" style="display:none">
           <div class="bundle-card">
-            <div class="bundle-header">
-              <div>
-                <div class="bundle-title">Re-request Bundle</div>
-                <div class="bundle-sub">Items flagged from Response Review → security@twilio.com</div>
+            <div class="bundle-header" style="cursor:default">
+              <div style="flex:1;min-width:0">
+                <div class="bundle-title" style="display:flex;align-items:center;gap:8px">
+                  Vendor Outreach Bundle
+                  <span style="font-size:10px;font-weight:600;font-family:'IBM Plex Mono',monospace;padding:2px 8px;border-radius:20px;background:var(--indigo-d);border:1px solid var(--indigo-r);color:var(--indigo);letter-spacing:.04em">Round 2</span>
+                </div>
+                <div class="bundle-sub">Follow-up requests → security@twilio.com</div>
               </div>
-              <span class="badge incomplete" style="font-size:9px">ROUND 3</span>
             </div>
             <div class="bundle-items" id="p4-new-bundle-items"></div>
             <div style="padding:14px 16px;border-top:1px solid var(--border-s)">
@@ -1694,17 +1775,13 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
             <div class="p5-tbody" id="rev-0">
               <span class="rev-name" style="display:none">Penetration Test Report</span>
               <div class="t-resolved-bar"><i data-lucide="check" style="width:13px;height:13px;stroke-width:2.5"></i> <span class="resolved-label"></span></div>
-              <div class="t-round">
-                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
-                <div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your most recent penetration test report, including scope, methodology, and remediation status for any open findings."</div></div>
-                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · Attached: pentest_2024_q1.pdf</div><div class="t-in-text">"Please find our latest penetration test report conducted by NCC Group in Q1 2024."</div></div>
-                <div class="ai-box"><strong>AI:</strong> Report is Q1 2024 — 14 months old, outside your 12-month policy. 1 open High finding (CVE-2024-1827) with no fix verification. Flagging for analyst review.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · SOC 2 CC7.2 · ISO 27001 A.12.6.1</div></div>
-              </div>
-              <div class="t-round cur">
-                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
-                <div class="t-out"><div class="t-out-from">Re-requested · security@twilio.com</div><div class="t-out-text">"The Q1 2024 report falls outside our 12-month policy. Please provide a more recent report, or confirm when the next test is scheduled."</div></div>
-                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"Our Q1 2024 report is the most current available. Next scheduled pen test is Q2 2025. We can provide interim vulnerability scan results as supplementary evidence."</div></div>
-                <div class="ai-box" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)"><strong>AI:</strong> Response does not resolve the gap — same Q1 2024 report, open high finding still unverified. Next test Q2 2025 is 2+ months away.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · <span class="ai-rec">Recommend: re-request or accept with exception note</span></div></div>
+              <div class="t-actions">
+                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
+                <div class="t-action-btns">
+                  <button class="btn-accept" onclick="resolve(0,'accepted')">Accept</button>
+                  <button class="btn-note" onclick="resolve(0,'accepted-note')">Accept with note</button>
+                  <button class="btn-rereq" onclick="addToQueue(0)">Re-request (R3)</button>
+                </div>
               </div>
               <div class="note-input-wrap" id="note-wrap-0">
                 <textarea class="note-textarea" id="note-0" placeholder="Add your exception note… (e.g. 'Accepted pending updated report in Q2 2025')"></textarea>
@@ -1713,13 +1790,17 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
                   <button class="btn-s" style="flex:none;font-size:11px;padding:5px 10px" onclick="cancelNote(0)">Cancel</button>
                 </div>
               </div>
-              <div class="t-actions">
-                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
-                <div class="t-action-btns">
-                  <button class="btn-accept" onclick="resolve(0,'accepted')">Accept</button>
-                  <button class="btn-note" onclick="resolve(0,'accepted-note')">Accept with note</button>
-                  <button class="btn-rereq" onclick="addToQueue(0)">Re-request (R3)</button>
-                </div>
+              <div class="t-round cur">
+                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
+                <div class="t-out"><div class="t-out-from">Re-requested · security@twilio.com</div><div class="t-out-text">"The Q1 2024 report falls outside our 12-month policy. Please provide a more recent report, or confirm when the next test is scheduled."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"Our Q1 2024 report is the most current available. Next scheduled pen test is Q2 2025. We can provide interim vulnerability scan results as supplementary evidence."</div></div>
+                <div class="ai-box" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)"><strong>AI:</strong> Response does not resolve the gap — same Q1 2024 report, open high finding still unverified. Next test Q2 2025 is 2+ months away.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · <span class="ai-rec">Recommend: re-request or accept with exception note</span></div></div>
+              </div>
+              <div class="t-round">
+                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
+                <div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your most recent penetration test report, including scope, methodology, and remediation status for any open findings."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · Attached: pentest_2024_q1.pdf</div><div class="t-in-text">"Please find our latest penetration test report conducted by NCC Group in Q1 2024."</div></div>
+                <div class="ai-box"><strong>AI:</strong> Report is Q1 2024 — 14 months old, outside your 12-month policy. 1 open High finding (CVE-2024-1827) with no fix verification. Flagging for analyst review.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · SOC 2 CC7.2 · ISO 27001 A.12.6.1</div></div>
               </div>
             </div>
           </div>
@@ -1737,17 +1818,13 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
             <div class="p5-tbody" id="rev-1">
               <span class="rev-name" style="display:none">BC/DR Test Report</span>
               <div class="t-resolved-bar"><i data-lucide="check" style="width:13px;height:13px;stroke-width:2.5"></i> <span class="resolved-label"></span></div>
-              <div class="t-round">
-                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
-                <div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your BC/DR test report including RTO and RPO results from the most recent DR exercise."</div></div>
-                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · Attached: bcdr_test_2024.pdf</div><div class="t-in-text">"Most recent DR exercise: Oct 2024. Achieved RTO of 5.2 hours and RPO of 15 minutes."</div></div>
-                <div class="ai-box"><strong>AI:</strong> RTO of 5.2h exceeds your 4h policy target. RPO within range. DR exercise recent (Oct 2024). Flagging RTO gap for clarification.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf med">Medium confidence</span> · ISO 27001 A.17.1.2 · SOC 2 A1.2</div></div>
-              </div>
-              <div class="t-round cur">
-                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
-                <div class="t-out"><div class="t-out-from">Clarification requested · security@twilio.com</div><div class="t-out-text">"Your RTO of 5.2h exceeds our 4h policy threshold. Please clarify your remediation plan and timeline."</div></div>
-                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"We acknowledge the gap. Infrastructure upgrade (AWS cross-region active-active) planned Q3 2025. Expected RTO ≤2h post-upgrade. We can provide a remediation commitment letter if needed."</div></div>
-                <div class="ai-box"><strong>AI:</strong> Vendor acknowledges gap and provides a committed remediation timeline (Q3 2025). Risk is a documented exception with a fix date.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf med">Medium confidence</span> · <span class="ai-rec">Recommend: accept with note — remediation timeline provided</span></div></div>
+              <div class="t-actions">
+                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
+                <div class="t-action-btns">
+                  <button class="btn-accept" onclick="resolve(1,'accepted')">Accept</button>
+                  <button class="btn-note" onclick="resolve(1,'accepted-note')">Accept with note</button>
+                  <button class="btn-rereq" onclick="addToQueue(1)">Re-request (R3)</button>
+                </div>
               </div>
               <div class="note-input-wrap" id="note-wrap-1">
                 <textarea class="note-textarea" id="note-1" placeholder="Add your exception note… (e.g. 'Accepted — Twilio committed to Q3 2025 remediation, flagged for follow-up')"></textarea>
@@ -1756,13 +1833,17 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
                   <button class="btn-s" style="flex:none;font-size:11px;padding:5px 10px" onclick="cancelNote(1)">Cancel</button>
                 </div>
               </div>
-              <div class="t-actions">
-                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
-                <div class="t-action-btns">
-                  <button class="btn-accept" onclick="resolve(1,'accepted')">Accept</button>
-                  <button class="btn-note" onclick="resolve(1,'accepted-note')">Accept with note</button>
-                  <button class="btn-rereq" onclick="addToQueue(1)">Re-request (R3)</button>
-                </div>
+              <div class="t-round cur">
+                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
+                <div class="t-out"><div class="t-out-from">Clarification requested · security@twilio.com</div><div class="t-out-text">"Your RTO of 5.2h exceeds our 4h policy threshold. Please clarify your remediation plan and timeline."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"We acknowledge the gap. Infrastructure upgrade (AWS cross-region active-active) planned Q3 2025. Expected RTO ≤2h post-upgrade. We can provide a remediation commitment letter if needed."</div></div>
+                <div class="ai-box"><strong>AI:</strong> Vendor acknowledges gap and provides a committed remediation timeline (Q3 2025). Risk is a documented exception with a fix date.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf med">Medium confidence</span> · <span class="ai-rec">Recommend: accept with note — remediation timeline provided</span></div></div>
+              </div>
+              <div class="t-round">
+                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
+                <div class="t-out"><div class="t-out-from">Outreach sent · security@twilio.com</div><div class="t-out-text">"Please provide your BC/DR test report including RTO and RPO results from the most recent DR exercise."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · Attached: bcdr_test_2024.pdf</div><div class="t-in-text">"Most recent DR exercise: Oct 2024. Achieved RTO of 5.2 hours and RPO of 15 minutes."</div></div>
+                <div class="ai-box"><strong>AI:</strong> RTO of 5.2h exceeds your 4h policy target. RPO within range. DR exercise recent (Oct 2024). Flagging RTO gap for clarification.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf med">Medium confidence</span> · ISO 27001 A.17.1.2 · SOC 2 A1.2</div></div>
               </div>
             </div>
           </div>
@@ -1780,17 +1861,13 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
             <div class="p5-tbody" id="rev-2">
               <span class="rev-name" style="display:none">Questionnaire</span>
               <div class="t-resolved-bar"><i data-lucide="check" style="width:13px;height:13px;stroke-width:2.5"></i> <span class="resolved-label"></span></div>
-              <div class="t-round">
-                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
-                <div class="t-out"><div class="t-out-from">Questionnaire sent · security@twilio.com · 44 questions</div><div class="t-out-text">"Please complete the attached security questionnaire covering access control, incident response, data handling, and business continuity."</div></div>
-                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · 41/44 answered</div><div class="t-in-text">"Questionnaire returned — 41 of 44 questions answered. 3 marked 'N/A — see SOC 2 report.'"</div></div>
-                <div class="ai-box"><strong>AI:</strong> 3 contradictions detected vs. SOC 2 Type II: (1) Patch SLA — questionnaire states 95% within 30d, SOC 2 shows 79%; (2) DLP scope — questionnaire includes email, SOC 2 does not; (3) Access review frequency conflict.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · SOC 2 CC6.1, CC7.2 · ISO 27001 A.8.8</div></div>
-              </div>
-              <div class="t-round cur">
-                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
-                <div class="t-out"><div class="t-out-from">Clarification requested · security@twilio.com</div><div class="t-out-text">"We identified 3 discrepancies between your questionnaire responses and SOC 2 report. Please clarify patch SLA compliance rate, DLP scope, and access review frequency."</div></div>
-                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"(1) 95% is our target; actual was 79% last period due to legacy migration — now resolved. (2) DLP extended to email Jan 2025 post-audit. (3) Privileged accounts: quarterly; standard: annual."</div></div>
-                <div class="ai-box" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)"><strong>AI:</strong> Patch SLA gap (79% vs 95%) is material. DLP extension is unverified post-audit. Access review clarification acceptable. 2 of 3 conflicts remain substantive.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · <span class="ai-rec">Recommend: re-request — conflicts unresolved after R2</span></div></div>
+              <div class="t-actions">
+                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept all</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
+                <div class="t-action-btns">
+                  <button class="btn-accept" onclick="resolve(2,'accepted')">Accept all</button>
+                  <button class="btn-note" onclick="resolve(2,'accepted-note')">Accept with note</button>
+                  <button class="btn-rereq" onclick="addToQueue(2)">Re-request (R3)</button>
+                </div>
               </div>
               <div class="note-input-wrap" id="note-wrap-2">
                 <textarea class="note-textarea" id="note-2" placeholder="Add your exception note… (e.g. 'Accepted — SOC 2 discrepancy noted, vendor to clarify at next review')"></textarea>
@@ -1799,13 +1876,17 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
                   <button class="btn-s" style="flex:none;font-size:11px;padding:5px 10px" onclick="cancelNote(2)">Cancel</button>
                 </div>
               </div>
-              <div class="t-actions">
-                <div class="t-action-hint">Consequence: <strong style="color:var(--t2)">Accept all</strong> adds to report · <strong style="color:var(--t2)">Accept with note</strong> flags exception · <strong style="color:var(--t2)">Re-request</strong> triggers Round 3</div>
-                <div class="t-action-btns">
-                  <button class="btn-accept" onclick="resolve(2,'accepted')">Accept all</button>
-                  <button class="btn-note" onclick="resolve(2,'accepted-note')">Accept with note</button>
-                  <button class="btn-rereq" onclick="addToQueue(2)">Re-request (R3)</button>
-                </div>
+              <div class="t-round cur">
+                <div class="t-rlbl" style="color:var(--amber)">Round 2 · Mar 16, 2025 <span class="badge" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:8px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700">CURRENT</span></div>
+                <div class="t-out"><div class="t-out-from">Clarification requested · security@twilio.com</div><div class="t-out-text">"We identified 3 discrepancies between your questionnaire responses and SOC 2 report. Please clarify patch SLA compliance rate, DLP scope, and access review frequency."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 17, 2025</div><div class="t-in-text">"(1) 95% is our target; actual was 79% last period due to legacy migration — now resolved. (2) DLP extended to email Jan 2025 post-audit. (3) Privileged accounts: quarterly; standard: annual."</div></div>
+                <div class="ai-box" style="border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)"><strong>AI:</strong> Patch SLA gap (79% vs 95%) is material. DLP extension is unverified post-audit. Access review clarification acceptable. 2 of 3 conflicts remain substantive.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · <span class="ai-rec">Recommend: re-request — conflicts unresolved after R2</span></div></div>
+              </div>
+              <div class="t-round">
+                <div class="t-rlbl">Round 1 · Mar 14, 2025</div>
+                <div class="t-out"><div class="t-out-from">Questionnaire sent · security@twilio.com · 44 questions</div><div class="t-out-text">"Please complete the attached security questionnaire covering access control, incident response, data handling, and business continuity."</div></div>
+                <div class="t-in"><div class="t-in-from">Twilio responded · Mar 15, 2025 · 41/44 answered</div><div class="t-in-text">"Questionnaire returned — 41 of 44 questions answered. 3 marked 'N/A — see SOC 2 report.'"</div></div>
+                <div class="ai-box"><strong>AI:</strong> 3 contradictions detected vs. SOC 2 Type II: (1) Patch SLA — questionnaire states 95% within 30d, SOC 2 shows 79%; (2) DLP scope — questionnaire includes email, SOC 2 does not; (3) Access review frequency conflict.<div class="ai-meta" style="margin-top:4px"><span class="ai-conf high">High confidence</span> · SOC 2 CC6.1, CC7.2 · ISO 27001 A.8.8</div></div>
               </div>
             </div>
           </div>
@@ -2017,6 +2098,24 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
 
     </div><!-- /pv-risk -->
 
+    <!-- ── UNIVERSAL AI ASSISTANT — persistent bottom panel, context-aware per phase ── -->
+    <div class="p5-ai-chat" id="p5-ai-chat" style="flex-shrink:0">
+      <div class="p5-ai-header" onclick="document.getElementById('p5-ai-chat').classList.toggle('collapsed')" style="cursor:pointer">
+        <div class="p5-ai-header-left">
+          <div class="ai-dot" style="width:6px;height:6px;border-radius:50%;background:var(--brand);animation:blink 2s ease-in-out infinite;flex-shrink:0"></div>
+          <span class="p5-ai-header-label">AI Assistant</span>
+          <span class="p5-ai-ctx-label">· <span id="p5-ai-ctx">AI Briefing</span></span>
+        </div>
+        <svg id="p5-ai-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="color:var(--t2);transition:transform .2s"><path d="M2 4l4 4 4-4"/></svg>
+        <div class="p5-ai-header-right"></div>
+      </div>
+      <div class="p5-ai-msgs" id="p5-ai-msgs"></div>
+      <div class="p5-ai-input-row">
+        <input class="p5-ai-input" id="p5-ai-input" placeholder="Ask about this evidence, policy alignment, or framework…" onkeydown="if(event.key==='Enter')p5AISend()">
+        <button class="p5-ai-send" onclick="p5AISend()">Ask</button>
+      </div>
+    </div>
+
   </main><!-- /main -->
 
     </div><!-- /assessment-body -->
@@ -2064,6 +2163,10 @@ function go(idx) {
   if (idx === 5) { const e = document.getElementById('pn5'); if (e) { e.style.borderLeftColor = 'transparent'; e.style.background = ''; } }
   const main = document.getElementById('main-content');
   if (main) main.focus();
+  // Update AI chat context for the active phase
+  const phaseKeyMap = { 'pv-brief': 'brief', 'pv0': 'p0', 'pv1': 'p1', 'pv2': 'p2', 'pv3': 'p3', 'pv4': 'p4', 'pv5': 'p5', 'pv-risk': 'risk' };
+  const pk = phaseKeyMap[viewId];
+  if (pk && typeof aiChatSetPhase === 'function') aiChatSetPhase(pk);
 }
 
 function goPhase6FromBrief() {
@@ -2222,12 +2325,11 @@ function addToQueue(idx) {
 }
 
 function buildBundleItemHTML(itemName, round, description, panelId) {
-  const badge = round === 'R3' ? `<span class="badge q" style="margin-right:6px">RE-REQUEST</span>` : `<span class="badge doc" style="margin-right:6px">DOC</span>`;
   const taId = panelId ? panelId.replace('panel', 'ta') : '';
   return `<div class="bi-row">` +
     `<div class="bi-check"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>` +
     `<div class="bi-body">` +
-      `<div class="bi-name">${badge}${itemName} <span class="p5-rnd" style="margin-left:6px">${round}</span></div>` +
+      `<div class="bi-name">${itemName} <span class="p5-rnd" style="margin-left:6px">${round}</span></div>` +
       `<div class="bi-sub">${description}</div>` +
     `</div>` +
     (panelId ? `<button class="bi-edit" onclick="toggleBundleEdit('${panelId}')">Edit</button>` : '') +
@@ -2287,6 +2389,9 @@ function addToBundleInPhase4(idx, itemName) {
   const newView = document.getElementById('p4-new-bundle-view');
   if (!newView) return;
   newView.style.display = 'block';
+  // Hide the waiting state — vendor has responded, we're now in re-request mode
+  const waiting = document.getElementById('p4-waiting');
+  if (waiting) waiting.style.display = 'none';
 
   const container = document.getElementById('p4-new-bundle-items');
   if (!container) return;
@@ -2683,6 +2788,7 @@ function p5Select(idx) {
   document.querySelectorAll('.p5-thread').forEach(el => el.classList.remove('active'));
   const thread = document.getElementById('thread-' + idx);
   if (thread) thread.classList.add('active');
+  p5AiInit(idx);
 }
 
 function p5Filter(filter) {
@@ -2750,15 +2856,6 @@ function acceptAllAI() {
   });
 }
 
-function toggleBundleHistory() {
-  const card = document.querySelector('#pv4 .bundle-card');
-  const btn = document.getElementById('p4-hist-btn');
-  if (!card) return;
-  const minimized = card.classList.contains('minimized');
-  card.classList.toggle('minimized', !minimized);
-  if (btn) btn.textContent = minimized ? 'Hide' : 'Show';
-}
-
 // Send bundle — 3-state flow: draft → sending → waiting → view responses
 function sendBundle(mode) {
   document.getElementById('p4-draft').style.display = 'none';
@@ -2770,13 +2867,15 @@ function sendBundle(mode) {
     document.getElementById('p4-sending').style.display = 'none';
     document.getElementById('p4-waiting').style.display = 'block';
     if (badge) { badge.textContent = 'SENT'; badge.className = 'badge sent'; }
-    // Minimize initial bundle card — becomes history row
-    const bundleCard = document.querySelector('#pv4 .bundle-card');
-    if (bundleCard) bundleCard.classList.add('minimized');
-    const histBtn = document.getElementById('p4-hist-btn');
-    if (histBtn) histBtn.textContent = 'Show';
-    const desc = document.getElementById('p4-desc');
-    if (desc) desc.textContent = 'Bundle dispatched to security@twilio.com — waiting for vendor response';
+    // Collapse initial bundle to history row — force-hide all content
+    const bundleCard = document.getElementById('p4-initial-bundle');
+    if (bundleCard) {
+      bundleCard.classList.add('minimized');
+      ['p4-bundle-items','p4-requeue-section'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
     const pn4sub = document.getElementById('pn4-sub');
     if (pn4sub) { pn4sub.textContent = 'Sent · Waiting on Twilio'; pn4sub.className = 'psub blue'; }
     phase5Sent = true;
@@ -2981,6 +3080,8 @@ async function initBriefing() {
   }
 
   await wait(300);
+  const loader = document.getElementById('ec-loader');
+  if (loader) loader.classList.add('done');
   // (attn box removed — vendor nav items carry their own status dots)
 }
 
@@ -3011,10 +3112,222 @@ async function initBriefing() {
   });
 })();
 
+// ── UNIVERSAL AI CHAT ──────────────────────────────────────────────────
+// Phase-level contexts (keys: 'brief','p0','p1','p2','p3','p4','p5','risk')
+const phaseAiCtx = {
+  'brief': {
+    name: 'AI Briefing',
+    opening: "I've completed automated pre-collection for Twilio's assessment. All 4 phases ran overnight. Two items need attention before outreach. What would you like to know?",
+    responses: [
+      { match: /scan|security|bitsight/i, reply: "BitSight 740/950 — above the 700 threshold. SecurityScorecard B (76/100), with DNS health and patching as weaker dimensions. Shodan flagged 3 open ports not in the expected profile." },
+      { match: /question|fill|142/i, reply: "142 of 186 questionnaire items pre-filled using the SOC 2 report, privacy policy, and prior assessment data. 44 items remain requiring direct vendor input — grouped by topic for the outreach bundle." },
+      { match: /outreach|bundle|send/i, reply: "The outreach bundle is ready: 5 items compiled. I've drafted the messages. Review and send from Phase 4 — Vendor Outreach." }
+    ]
+  },
+  'p0': {
+    name: 'External Security Scan',
+    opening: "External scan complete for Twilio. BitSight 740/950, SecurityScorecard B (76/100). Flag: 3 Shodan-identified open ports not in the expected service profile. What do you want to dig into?",
+    responses: [
+      { match: /bitsight|740/i, reply: "BitSight 740 is in the 'good' tier (threshold: 700). Main drags: patching cadence (14-day avg vs. 7-day best practice) and a few expired TLS certs on subdomains." },
+      { match: /shodan|port|open/i, reply: "The 3 flagged ports: 8443 (HTTPS alt), 9200 (Elasticsearch — should be internal-only), and 5672 (AMQP/RabbitMQ). The Elasticsearch port is concerning if internet-facing. Flag for pen test reviewer." },
+      { match: /securityscorecard|grade/i, reply: "SecurityScorecard B (76/100). Two sub-dimensions below threshold: DNS Health (missing DMARC on 3 subdomains) and Application Security (2 older CVEs in public-facing stack)." }
+    ]
+  },
+  'p1': {
+    name: 'Trust Center Discovery',
+    opening: "Trust center pull complete. SOC 2 Type II, ISO 27001 cert, and privacy policy retrieved. Pen test was NDA-gated — flagged for manual retrieval. Sub-processor list: Stripe is new since last assessment. What do you need?",
+    responses: [
+      { match: /soc|audit/i, reply: "SOC 2 Type II covers July 2023–June 2024, audited by Deloitte. No material exceptions. Current — within the 12-month recency window." },
+      { match: /pen.?test|nda/i, reply: "The pen test requires NDA acceptance on the trust center portal. 6-step retrieval: log in to trust.twilio.com → Security → Penetration Testing → accept NDA → download. Or request via the vendor outreach bundle." },
+      { match: /stripe|sub.?processor/i, reply: "Stripe is new to Twilio's sub-processor list. Handles payment processing for Twilio's billing. Has SOC 2 Type II and PCI DSS Level 1. Confirm whether Stripe touches assessment-relevant data in your flows." }
+    ]
+  },
+  'p2': {
+    name: 'Public Registry & Screening',
+    opening: "Registry and screening complete. SEC EDGAR: no material cybersecurity incidents. OFAC: clear. Adverse media: one item — a March 2024 outage post-mortem (TechCrunch). PEP and litigation: clear. Want details?",
+    responses: [
+      { match: /sec|edgar/i, reply: "No material cybersecurity incident disclosures under the new SEC Rule 13a-15. The March 2024 outage was disclosed in a 10-Q as an operational event, not classified as a material cybersecurity incident." },
+      { match: /adverse|outage|techcrunch/i, reply: "March 2024 TechCrunch article: a 47-minute SMS delivery outage affecting ~3% of traffic. Root cause: BGP routing misconfiguration. Reliability flag, not a security flag. Note in the availability dimension." },
+      { match: /ofac|pep|litigation/i, reply: "OFAC: clean. No SDN list matches. PEP check on executive team: no flags. Litigation search: two civil cases (patent disputes, unrelated to data or security). No open regulatory actions." }
+    ]
+  },
+  'p3': {
+    name: 'Questionnaire Coverage',
+    opening: "Questionnaire pre-fill complete: 142 of 186 items (76%). 44 remaining items need direct vendor confirmation — grouped into 5 topics: patch SLA, incident response SLAs, sub-processor agreements, BC/DR testing, and encryption key management.",
+    responses: [
+      { match: /patch|sla/i, reply: "9 open patch management items. The SOC 2 report covers the process but not actual SLA performance metrics. The questionnaire asks for % of critical patches applied within 7 days — only the vendor can provide current-state data." },
+      { match: /incident|response/i, reply: "7 open incident response items. I pre-filled process questions from SOC 2. Open items are SLA commitments: customer notification timelines, RTO/RCA delivery — not in any public document." },
+      { match: /142|76|fill/i, reply: "142/186 is a strong pre-fill rate. Sources: SOC 2 Type II (68 items), privacy policy (31), ISO 27001 scope (24), prior assessment carry-forward (19). The 44 remaining require live vendor input." }
+    ]
+  },
+  'p4': {
+    name: 'Vendor Outreach',
+    opening: "Outreach bundle compiled: 5 items ready for security@twilio.com. I've drafted messages for each request, factoring in NDA requirements and the specific gaps from evidence collection. What do you want to know?",
+    responses: [
+      { match: /pen.?test|nda/i, reply: "The pen test message references the NDA requirement and asks for a report within the last 12 months. Includes policy language citing SOC 2 CC7.2. If they respond with the Q1 2024 report again, that auto-flags for re-request." },
+      { match: /bundle|5|item/i, reply: "5 items: (1) Pen Test Report, (2) BC/DR Test Report, (3) Cyber Insurance Certificate, (4) Vulnerability Scan, (5) Questionnaire 44 Qs. Each has an independent send state — you can send individually or all at once." },
+      { match: /edit|message|draft/i, reply: "Click 'Edit' on any bundle item to modify the vendor-facing draft. I've pre-written based on the specific gap. You can reset to my draft at any time." }
+    ]
+  },
+  'p5': {
+    name: 'Response Review',
+    opening: "3 vendor responses need review. Key flags: pen test is 13 months old (policy: 12), BC/DR RTO is 1.2h over your ceiling, and the questionnaire shows 3 SOC 2 contradictions + patch SLA 79% vs. your 95% minimum. What would you like me to clarify?",
+    responses: [
+      { match: /pen.?test|r2|outdated/i, reply: "Pen test (Thread 0): Q1 2024 report, 13 months old. R2 response confirmed no newer report — next test Q2 2025. Recommend re-request (R3) or accept with an exception note requiring updated evidence within 60 days." },
+      { match: /bc|dr|rto|gap/i, reply: "BC/DR (Thread 1): 5.2h RTO vs. your 4h policy. Twilio committed to remediation by Q3 2025. Narrow gap, committed timeline — the most defensible accept-with-note candidate in the queue." },
+      { match: /question|soc|patch|79/i, reply: "Questionnaire (Thread 2): 3 SOC 2 contradictions and patch SLA 79% vs. 95% minimum. The patch SLA gap is most material — 1 in 5 critical patches applied late for a PII-at-scale vendor. Recommend re-request." }
+    ]
+  },
+  'risk': {
+    name: 'Risk Assessment',
+    opening: "Evidence collection is complete. Ready to synthesize the full assessment across SOC 2, ISO 27001, HIPAA, and PCI DSS. What questions do you have before I begin?",
+    responses: [
+      { match: /tier|2|recommend/i, reply: "Based on the evidence profile, I'll recommend Tier 2 (Moderate Risk). Key drivers: pen test recency gap, patch SLA below threshold, and BC/DR RTO overrun. All documented and mitigated — not unresolved unknowns." },
+      { match: /framework|soc|iso/i, reply: "Analysis covers 7 control areas: Access Controls, Vulnerability Management, Incident Response, BC/DR, Data Protection, Vendor Management, and Compliance Posture — weighted against SOC 2 and your secondary frameworks." },
+      { match: /decision|analyst/i, reply: "3 analyst decisions carry into the report: pen test re-requested, BC/DR accepted with note (Q3 2025 commitment), questionnaire re-requested. Open re-requests are flagged as 'pending' and generate follow-up tasks." }
+    ]
+  }
+};
+
+// Thread-level contexts for Phase 5 review items (keyed by thread index)
+const p5AiCtx = {
+  0: {
+    name: 'Penetration Test Report',
+    opening: "I've reviewed Twilio's Q1 2024 pen test. Two issues: the report is 13 months old — your policy requires ≤12 months — and there's one open High finding (improper input validation in the messaging API, ETA Q2 2025). My recommendation is to re-request. What do you want to know?",
+    responses: [
+      { match: /recen|old|age|month|date/i, reply: "The policy threshold is 12 months. Twilio's report is dated February 2024 — 13 months old as of today. Under SOC 2 CC7.2, this falls outside the assessment window. A fresh test or a bridge letter from their pen-test firm would satisfy the requirement." },
+      { match: /high|finding|vuln|cve|api/i, reply: "The open High is improper input validation in the messaging API endpoint — not yet public. Twilio notes remediation is in progress (ETA Q2 2025). Under your risk policy, open Highs require either confirmed remediation or explicit acceptance with a documented rationale before closing." },
+      { match: /accept|risk|close/i, reply: "Accepting as-is carries two residual risks: (1) you'd be relying on a 13-month-old snapshot of their attack surface, and (2) the open High has no confirmed close date. If you accept, I'd add a note requiring remediation evidence within 90 days and flag for re-review." },
+      { match: /re.?request|send|ask/i, reply: "I can draft the re-request message: 'Please provide a current penetration test report dated within the last 12 months. The Q1 2024 report on file falls outside our recency policy. Additionally, please provide a remediation update for the open High finding in the messaging API. Our NDA is on file.'" }
+    ]
+  },
+  1: {
+    name: 'BC/DR Test Report',
+    opening: "Twilio's DR test shows RTO 5.2h against your 4h policy ceiling — a 1.2h gap. Last test was Q3 2024. They've committed to remediation by Q3 2025. Given the gap is narrow and a timeline is committed, accepting with a note is defensible. What would you like to explore?",
+    responses: [
+      { match: /rto|hour|gap|time/i, reply: "Your policy ceiling is 4h RTO. Twilio's last DR test recorded 5.2h — a 1.2h overage. For a communications-layer vendor (not hosting your core data), this gap is manageable. The materiality depends on your SLA with end customers during an outage scenario." },
+      { match: /accept|note|remedia/i, reply: "Accepting with a note is the right call here. The note should: (1) document the 1.2h RTO gap, (2) reference Twilio's Q3 2025 remediation commitment, and (3) flag for re-review at the next assessment cycle. SOC 2 CC9.2 allows for accepted risk with documented rationale." },
+      { match: /test|dr|last|q3|2024/i, reply: "Last DR test was Q3 2024. Full failover to AWS us-west-2 was tested with no data loss. RTO measured at 5.2h, RPO at 2h. The test methodology appears sound — the gap is in recovery speed, not in test quality or coverage." },
+      { match: /policy|framework|iso|soc/i, reply: "ISO 22301 doesn't mandate a specific RTO — that's your internal threshold. SOC 2 CC9.1 requires a tested recovery plan; Twilio satisfies that. The gap is against your internal 4h ceiling, not a regulatory requirement, which makes an acceptance-with-note approach more defensible." }
+    ]
+  },
+  2: {
+    name: 'Questionnaire',
+    opening: "Three contradictions flagged in the SOC 2 section: CC6.3 (access controls), CC7.2 (change management), and A1.2 (availability). Separately, patch SLA is self-reported at 79% vs. your 95% minimum — the more material gap. I recommend re-requesting. What would you like me to clarify?",
+    responses: [
+      { match: /contra|cc6|cc7|soc|access/i, reply: "CC6.3 contradiction: the questionnaire states 'MFA enforced on all admin access' but the SOC 2 Type II notes a legacy tooling exception. This is common but needs to be explicit — Twilio should update their answer to reflect the exception scope rather than a blanket claim." },
+      { match: /patch|sla|79|95|percent/i, reply: "Patch SLA is the most material gap: 79% on-time for critical patches vs. your 95% minimum. That's roughly 1 in 5 critical patches applied late. For a vendor with PII at scale, this is a real control gap. Re-requesting gets their improvement plan on file, which protects your organization if anything goes wrong." },
+      { match: /accept|risk/i, reply: "Accepting as-is means the patch SLA gap is in your assessment record as known and accepted. If Twilio has a breach linked to an unpatched vulnerability, your documentation shows awareness. At minimum, re-request to get their patch improvement plan on file — it changes the risk posture significantly." },
+      { match: /draft|message|text|question/i, reply: "Here's draft re-request language: 'Three items need clarification: (1) CC6.3 — please clarify the scope of the MFA exception for legacy tooling; (2) CC7.2 — please describe your change approval workflow for production deployments; (3) Patch SLA — your current rate is 79% against our 95% minimum; please provide your remediation plan and target timeline.'" }
+    ]
+  }
+};
+
+// aiHistory keyed by context key (phase key like 'brief','p0' or thread idx like 0,1,2)
+let aiHistory = {};
+let aiCurrentKey = 'brief'; // tracks active context key
+
+// Resolve the current context object and key
+function aiGetCtx() {
+  // In Phase 5 with an active thread, use thread-level context
+  const activeView = document.querySelector('.phase-view.active');
+  const viewId = activeView ? activeView.id : '';
+  if (viewId === 'pv5') {
+    const activeThread = document.querySelector('.p5-thread.active');
+    if (activeThread) {
+      const idx = parseInt(activeThread.id.replace('thread-', ''));
+      const ctx = p5AiCtx[idx];
+      const name = ctx ? ctx.name : (activeThread.querySelector('.p5-thd-name')?.textContent?.replace(/\s+[A-Z]+$/, '').trim() || 'this item');
+      return { key: idx, ctx: ctx || { name, opening: "I'm here to help you review this evidence. Ask me about the vendor's response, policy alignment, or framework requirements.", responses: [] } };
+    }
+    // pv5 but no thread selected — use phase context
+    return { key: 'p5', ctx: phaseAiCtx['p5'] };
+  }
+  // Map view ID to phase key
+  const phaseMap = { 'pv-brief': 'brief', 'pv0': 'p0', 'pv1': 'p1', 'pv2': 'p2', 'pv3': 'p3', 'pv4': 'p4', 'pv-risk': 'risk' };
+  const key = phaseMap[viewId] || 'brief';
+  return { key, ctx: phaseAiCtx[key] || phaseAiCtx['brief'] };
+}
+
+function aiChatSetContext(key, ctx) {
+  aiCurrentKey = key;
+  document.getElementById('p5-ai-ctx').textContent = ctx.name;
+  if (!aiHistory[key]) {
+    aiHistory[key] = [{ role: 'ai', text: ctx.opening }];
+  }
+  aiRender(key);
+}
+
+function aiRender(key) {
+  const msgs = document.getElementById('p5-ai-msgs');
+  msgs.innerHTML = '';
+  (aiHistory[key] || []).forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'p5-ai-msg ' + m.role;
+    if (m.role === 'ai') {
+      div.innerHTML = `<div class="p5-ai-avatar"><div style="width:5px;height:5px;border-radius:50%;background:var(--brand)"></div></div><div class="p5-ai-bubble">${m.text}</div>`;
+    } else {
+      div.innerHTML = `<div class="p5-ai-bubble">${m.text}</div>`;
+    }
+    msgs.appendChild(div);
+  });
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// Called when navigating to a phase (from go())
+function aiChatSetPhase(phaseKey) {
+  const ctx = phaseAiCtx[phaseKey];
+  if (!ctx) return;
+  aiChatSetContext(phaseKey, ctx);
+}
+
+// Called when selecting a Phase 5 thread item (from p5Select())
+function p5AiInit(threadIdx) {
+  const ctx = p5AiCtx[threadIdx];
+  const name = ctx ? ctx.name : (document.querySelector('#thread-' + threadIdx + ' .p5-thd-name')?.textContent?.replace(/\s+[A-Z]+$/, '').trim() || 'this item');
+  const ctxObj = ctx || { name, opening: "I'm here to help you review this evidence. Ask me about the vendor's response, policy alignment, or framework requirements.", responses: [] };
+  aiChatSetContext(threadIdx, ctxObj);
+}
+
+function p5AISend() {
+  const input = document.getElementById('p5-ai-input');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+
+  const { key, ctx } = aiGetCtx();
+
+  if (!aiHistory[key]) aiHistory[key] = [];
+  aiHistory[key].push({ role: 'user', text: q });
+  aiRender(key);
+
+  const msgs = document.getElementById('p5-ai-msgs');
+  const typing = document.createElement('div');
+  typing.className = 'p5-ai-msg ai';
+  typing.id = 'p5-ai-typing';
+  typing.innerHTML = `<div class="p5-ai-avatar"><div style="width:5px;height:5px;border-radius:50%;background:var(--brand)"></div></div><div class="p5-ai-typing"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    let reply = "I can help with that. Could you be more specific — are you asking about policy alignment, the vendor's response, or a specific control?";
+    if (ctx && ctx.responses) {
+      for (const r of ctx.responses) {
+        if (r.match.test(q)) { reply = r.reply; break; }
+      }
+    }
+    const t = document.getElementById('p5-ai-typing');
+    if (t) t.remove();
+    aiHistory[key].push({ role: 'ai', text: reply });
+    aiRender(key);
+  }, 900);
+}
+
 // Init
 initBriefing();
 startCountdown();
 lucide.createIcons();
+aiChatSetPhase('brief');
 </script>
 </body>
 </html>
