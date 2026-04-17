@@ -985,6 +985,12 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
       <div class="pipe-step locked" aria-disabled="true">Emails</div>
       <span class="pipe-sep" aria-hidden="true">›</span>
       <div class="pipe-step locked" aria-disabled="true">Monitoring</div>
+      <div style="margin-left:auto;padding-left:16px;flex-shrink:0;display:flex;align-items:center;gap:8px;border-left:1px solid var(--border)">
+        <div style="width:56px;height:3px;background:var(--border);border-radius:2px;overflow:hidden">
+          <div id="pipe-progress" style="height:100%;width:40%;background:var(--brand);border-radius:2px;transition:width .5s ease"></div>
+        </div>
+        <span id="pipe-step-label" style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);white-space:nowrap">Step 3 of 6</span>
+      </div>
     </nav>
 
     <!-- Assessment body: phase nav + main content -->
@@ -1000,7 +1006,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
     <div class="nav-stats" role="list" aria-label="Evidence collection summary">
       <div class="stat-cell" onclick="go(3)" tabindex="0" role="listitem button" aria-label="76 percent evidence coverage — click to view questionnaire"><div class="stat-val green" id="sv-coverage" aria-hidden="true">76%</div><div class="stat-key" aria-hidden="true">Coverage</div></div>
       <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="19 open gaps still unresolved — click to view vendor communication"><div class="stat-val amber" id="sv-gaps" aria-hidden="true">19</div><div class="stat-key" aria-hidden="true">Open Gaps</div></div>
-      <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="3 items awaiting your review — click to view vendor communication"><div class="stat-val" style="color:var(--red)" id="sv-awaiting" aria-hidden="true">3</div><div class="stat-key" aria-hidden="true">Awaiting Me</div></div>
+      <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="3 items pending your review — click to view vendor communication"><div class="stat-val" style="color:var(--red)" id="sv-awaiting" aria-hidden="true">3</div><div class="stat-key" aria-hidden="true">Pending Review</div></div>
       <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="Round 2 of communication — click to view vendor communication"><div class="stat-val blue" aria-hidden="true">R2</div><div class="stat-key" aria-hidden="true">Round</div></div>
     </div>
 
@@ -2001,6 +2007,10 @@ function updatePipelineForRisk(active) {
       steps[3].classList.remove('current'); steps[3].classList.add('locked');
     }
   }
+  const bar = document.getElementById('pipe-progress');
+  const lbl = document.getElementById('pipe-step-label');
+  if (bar) bar.style.width = active ? '57%' : '40%';
+  if (lbl) lbl.textContent = active ? 'Step 4 of 6' : 'Step 3 of 6';
 }
 
 // Expandable doc rows
