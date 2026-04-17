@@ -205,8 +205,12 @@ body{
   margin-bottom:2px;
 }
 .phase-item:hover{background:var(--card)}
-.phase-item.active{background:var(--card);border-left-color:var(--brand)}
+.phase-item.active{background:rgba(155,174,203,.1);border-left-color:transparent}
 .phase-item.active .pname{color:var(--t1)}
+.phase-item.attn{background:rgba(245,158,11,.07);border-left-color:rgba(245,158,11,.55)}
+.phase-item.attn .pname{color:var(--t1)}
+.phase-item.attn:hover{background:rgba(245,158,11,.12)}
+.phase-item.attn.active{background:rgba(155,174,203,.1);border-left-color:transparent}
 .pstep{
   width:20px;height:20px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -922,8 +926,8 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
 .p5-ai-msg.ai .p5-ai-bubble{background:var(--card);color:var(--t2);border:1px solid var(--border-s)}
 .p5-ai-msg.user .p5-ai-bubble{background:var(--brand-dim);color:var(--t1);border:1px solid var(--brand-ring)}
 .p5-ai-avatar{
-  width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-top:1px;
-  background:var(--green-d);border:1px solid var(--green-r);
+  width:22px;height:22px;border-radius:6px;flex-shrink:0;margin-top:1px;
+  background:#0B1A12;border:1px solid rgba(74,222,128,.25);
   display:flex;align-items:center;justify-content:center;
 }
 .p5-ai-typing{display:flex;gap:3px;padding:8px 11px;background:var(--card);border:1px solid var(--border-s);border-radius:8px;align-items:center}
@@ -975,12 +979,15 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
   <div class="bc">
     <span class="cur">New Vendor Assessment</span>
     <span class="sep" aria-hidden="true">›</span>
-    <span class="cur">Twilio Inc.</span>
-    <span class="sep" aria-hidden="true">›</span>
-    <span class="act" aria-current="page">Evidence Collection</span>
+    <span class="act" aria-current="page">Agentic Risk Assessment Pipeline</span>
   </div>
   </nav>
-  <div class="tb-right"></div>
+  <div class="tb-right">
+    <div style="display:flex;align-items:center;gap:7px;padding:4px 10px 4px 6px;border-radius:20px;background:var(--card);border:1px solid var(--border);cursor:pointer">
+      <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace;flex-shrink:0">TW</div>
+      <span style="font-size:12px;font-weight:500;color:var(--t1);font-family:'IBM Plex Sans',sans-serif">Twilio</span>
+    </div>
+  </div>
 </header>
 
 <!-- BODY -->
@@ -1151,7 +1158,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
       <div class="nav-group-label" style="font-size:9px;letter-spacing:.07em;color:var(--t4);margin:0 0 2px">VENDOR COMMUNICATION</div>
     </div>
     <div class="phase-list" role="list" id="vendor-phase-list" style="flex:0 0 auto;overflow:visible">
-      <div class="phase-item" id="pn4" onclick="go(4)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s;border-left-color:var(--amber);background:rgba(245,158,11,.03)">
+      <div class="phase-item attn" id="pn4" onclick="go(4)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
         <div class="pstep" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)"><i data-lucide="send" style="width:11px;height:11px;color:var(--amber);stroke-width:2"></i></div>
         <div class="pinfo">
           <div class="pname" style="font-weight:600">Vendor Outreach</div>
@@ -1159,7 +1166,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
         </div>
         <span id="pn4-bundle-badge" style="display:none;font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace;padding:2px 5px;border-radius:3px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);color:var(--brand);flex-shrink:0;margin-left:4px"></span>
       </div>
-      <div class="phase-item" id="pn5" onclick="go(5)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .4s,transform .4s;border-left-color:var(--amber);background:rgba(245,158,11,.03)">
+      <div class="phase-item attn" id="pn5" onclick="go(5)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .4s,transform .4s">
         <div class="pstep warn"><i data-lucide="inbox" style="width:11px;height:11px;stroke-width:2"></i></div>
         <div class="pinfo">
           <div class="pname" style="font-weight:600">Response Review</div>
@@ -2102,9 +2109,9 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
     <div class="p5-ai-chat" id="p5-ai-chat" style="flex-shrink:0">
       <div class="p5-ai-header" onclick="document.getElementById('p5-ai-chat').classList.toggle('collapsed')" style="cursor:pointer">
         <div class="p5-ai-header-left">
-          <div class="ai-dot" style="width:6px;height:6px;border-radius:50%;background:var(--brand);animation:blink 2s ease-in-out infinite;flex-shrink:0"></div>
+          <div style="width:20px;height:20px;border-radius:5px;background:#0B1A12;border:1px solid rgba(74,222,128,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="shield" style="width:12px;height:12px;color:#4ADE80;stroke-width:2"></i></div>
           <span class="p5-ai-header-label">AI Assistant</span>
-          <span class="p5-ai-ctx-label">· <span id="p5-ai-ctx">AI Briefing</span></span>
+          <span class="p5-ai-ctx-label">· <span id="p5-ai-ctx">Twilio Inc. · Overview</span></span>
         </div>
         <svg id="p5-ai-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="color:var(--t2);transition:transform .2s"><path d="M2 4l4 4 4-4"/></svg>
         <div class="p5-ai-header-right"></div>
@@ -2158,9 +2165,6 @@ function go(idx) {
   document.getElementById(viewId).classList.add('active');
   const navEl = navId ? document.getElementById(navId) : null;
   if (navEl) { navEl.classList.add('active'); navEl.setAttribute('aria-current', 'true'); }
-  // Clear action highlights once visited
-  if (idx === 4) { const e = document.getElementById('pn4'); if (e) { e.style.borderLeftColor = 'transparent'; e.style.background = ''; } }
-  if (idx === 5) { const e = document.getElementById('pn5'); if (e) { e.style.borderLeftColor = 'transparent'; e.style.background = ''; } }
   const main = document.getElementById('main-content');
   if (main) main.focus();
   // Update AI chat context for the active phase
@@ -3116,7 +3120,7 @@ async function initBriefing() {
 // Phase-level contexts (keys: 'brief','p0','p1','p2','p3','p4','p5','risk')
 const phaseAiCtx = {
   'brief': {
-    name: 'AI Briefing',
+    name: 'Twilio Inc. · Overview',
     opening: "I've completed automated pre-collection for Twilio's assessment. All 4 phases ran overnight. Two items need attention before outreach. What would you like to know?",
     responses: [
       { match: /scan|security|bitsight/i, reply: "BitSight 740/950 — above the 700 threshold. SecurityScorecard B (76/100), with DNS health and patching as weaker dimensions. Shodan flagged 3 open ports not in the expected profile." },
@@ -3258,6 +3262,8 @@ function aiChatSetContext(key, ctx) {
   aiRender(key);
 }
 
+const AI_AVATAR_SVG = `<i data-lucide="shield" style="width:12px;height:12px;color:#4ADE80;stroke-width:2"></i>`;
+
 function aiRender(key) {
   const msgs = document.getElementById('p5-ai-msgs');
   msgs.innerHTML = '';
@@ -3265,13 +3271,14 @@ function aiRender(key) {
     const div = document.createElement('div');
     div.className = 'p5-ai-msg ' + m.role;
     if (m.role === 'ai') {
-      div.innerHTML = `<div class="p5-ai-avatar"><div style="width:5px;height:5px;border-radius:50%;background:var(--brand)"></div></div><div class="p5-ai-bubble">${m.text}</div>`;
+      div.innerHTML = `<div class="p5-ai-avatar">${AI_AVATAR_SVG}</div><div class="p5-ai-bubble">${m.text}</div>`;
     } else {
       div.innerHTML = `<div class="p5-ai-bubble">${m.text}</div>`;
     }
     msgs.appendChild(div);
   });
   msgs.scrollTop = msgs.scrollHeight;
+  lucide.createIcons();
 }
 
 // Called when navigating to a phase (from go())
@@ -3305,9 +3312,10 @@ function p5AISend() {
   const typing = document.createElement('div');
   typing.className = 'p5-ai-msg ai';
   typing.id = 'p5-ai-typing';
-  typing.innerHTML = `<div class="p5-ai-avatar"><div style="width:5px;height:5px;border-radius:50%;background:var(--brand)"></div></div><div class="p5-ai-typing"><span></span><span></span><span></span></div>`;
+  typing.innerHTML = `<div class="p5-ai-avatar">${AI_AVATAR_SVG}</div><div class="p5-ai-typing"><span></span><span></span><span></span></div>`;
   msgs.appendChild(typing);
   msgs.scrollTop = msgs.scrollHeight;
+  lucide.createIcons();
 
   setTimeout(() => {
     let reply = "I can help with that. Could you be more specific — are you asking about policy alignment, the vendor's response, or a specific control?";
