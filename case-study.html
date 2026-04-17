@@ -112,8 +112,7 @@
     .identity-desc {
       font-size: 15px; color: var(--t2); max-width: 540px; line-height: 1.7;
     }
-    .identity-right { text-align: right; padding-bottom: 4px; }
-    .identity-links { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+    .identity-right { text-align: right; padding-bottom: 4px; display: flex; align-items: flex-end; }
     .identity-link-item {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 12px; color: var(--t2); text-decoration: none;
@@ -121,10 +120,11 @@
     }
     .identity-link-item:hover { color: var(--t1); }
     .btn-primary {
-      padding: 9px 18px; border-radius: 6px;
+      padding: 9px 20px; border-radius: 6px;
       background: var(--pos); color: #070B13;
-      font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+      font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600;
       border: none; cursor: pointer; transition: background 0.15s;
+      letter-spacing: -0.01em;
     }
     .btn-primary:hover { background: #6ee7a0; }
     .btn-ghost {
@@ -595,113 +595,11 @@
     .drawer-progress { flex: 1; height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
     .drawer-progress-fill { height: 100%; background: var(--pos); border-radius: 1px; transition: width 0.3s ease; }
 
-    /* ─── Framing section ─── */
-    .framing-section {
-      padding: 72px 48px 0;
-      max-width: 1100px; margin: 0 auto;
-    }
-    .framing-para {
-      font-size: 17px; line-height: 1.8; color: var(--t2);
-      max-width: 780px; margin-bottom: 48px;
-    }
-    .framing-para strong { color: var(--t1); font-weight: 600; }
-    .brief-items {
-      display: flex; flex-direction: column;
-      border-top: 1px solid var(--border);
-    }
-    .brief-item {
-      display: grid; grid-template-columns: 200px 24px 1fr;
-      gap: 0 12px; align-items: baseline;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .bi-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: var(--t3);
-      letter-spacing: 0.06em; padding-top: 2px;
-    }
-    .bi-arrow {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; color: var(--pos);
-    }
-    .bi-solution { font-size: 13px; color: var(--t1); line-height: 1.6; }
-
-    /* ─── Two-column brief ─── */
-    .brief-section {
-      padding: 72px 48px;
-      max-width: 1100px; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 64px; align-items: start;
-      border-top: 1px solid var(--border);
-    }
-    .col-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: var(--t3);
-      letter-spacing: 0.1em; margin-bottom: 28px;
-    }
-    .proto-items { display: flex; flex-direction: column; }
-    .proto-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
-    .proto-item:first-child { border-top: 1px solid var(--border); }
-    .pi-name {
-      display: block; font-size: 13px; font-weight: 600;
-      color: var(--t1); margin-bottom: 4px;
-    }
-    .pi-desc { font-size: 12.5px; color: var(--t2); line-height: 1.6; }
-
-    .ai-items { display: flex; flex-direction: column; gap: 0; }
-    .ai-item {
-      display: grid; grid-template-columns: 28px 1fr; gap: 14px;
-      padding: 20px 0; border-bottom: 1px solid var(--border);
-      align-items: start;
-    }
-    .ai-item:first-child { border-top: 1px solid var(--border); }
-    .ai-num {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10px; color: var(--pos);
-      padding-top: 3px; letter-spacing: 0.04em;
-    }
-    .ai-item-title {
-      font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 5px;
-    }
-    .ai-item-desc { font-size: 12.5px; color: var(--t2); line-height: 1.65; }
-    .ai-quote {
-      margin-top: 10px; padding: 10px 14px;
-      background: var(--surface);
-      border-left: 2px solid var(--pos);
-      border-radius: 0 4px 4px 0;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; color: var(--t2);
-      font-style: italic; line-height: 1.6;
-    }
-
-    /* ─── Visual design (tighter) ─── */
-    .visual-section {
-      padding: 72px 48px;
-      max-width: 1100px; margin: 0 auto;
-      border-top: 1px solid var(--border);
-    }
-
-    /* ─── Final CTA ─── */
-    .final-cta {
-      border-top: 1px solid var(--border);
-      max-width: 1100px; margin: 0 auto;
-      padding: 56px 48px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .final-cta-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 13px; color: var(--t2);
-    }
-    .final-cta-label span { color: var(--t3); display: block; font-size: 11px; margin-bottom: 4px; }
-    .btn-large {
-      padding: 12px 28px; font-size: 13px;
-    }
-
     /* ─── Footer ─── */
     .cs-footer {
       border-top: 1px solid var(--border);
       max-width: 1100px; margin: 0 auto;
-      padding: 28px 48px;
+      padding: 32px 48px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .footer-name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--t3); }
@@ -727,10 +625,11 @@
       <span class="top-nav-name">APOORV SINGH · ZANIA DESIGN CHALLENGE</span>
     </div>
     <div class="top-nav-links">
-      <a href="#s-framing">Overview</a>
-      <a href="#s-brief">Prototype</a>
-      <a href="#s-visual">Design System</a>
-      <a href="https://zania-apoorv.vercel.app" target="_blank" rel="noopener">Live Prototype ↗</a>
+      <a href="#s-problem">The Brief</a>
+      <a href="#s-scope">Scope</a>
+      <a href="#s-visual">Visual Design</a>
+      <a href="#s-ai">AI Workflow</a>
+      <a href="https://zania-apoorv.vercel.app" target="_blank" rel="noopener">Prototype ↗</a>
     </div>
   </nav>
 
@@ -746,18 +645,13 @@
         <span class="sep">·</span>
         <span>April 2026</span>
       </div>
+      <a class="identity-link-item reveal" href="https://apoorv.design" target="_blank" rel="noopener" style="margin-top: 8px; display: inline-block;">Portfolio ↗</a>
     </div>
     <div class="identity-right reveal">
-      <div class="identity-links">
-        <a class="identity-link-item" href="https://apoorv.design" target="_blank" rel="noopener">Portfolio ↗</a>
-        <button class="btn-primary" onclick="enterProto()">View Prototype →</button>
-      </div>
+      <button class="btn-primary" onclick="enterProto()">View Prototype →</button>
     </div>
   </div>
 
-  <!-- ── Group: Context ── -->
-  <hr class="full-divider">
-  <div class="section-group-label">CONTEXT</div>
 
   <!-- The Problem -->
   <section class="cs-section" id="s-problem">
@@ -849,9 +743,6 @@
     </div>
   </section>
 
-  <!-- ── Group: Action ── -->
-  <hr class="full-divider">
-  <div class="section-group-label">ACTION</div>
 
   <!-- Visual Design Rationale -->
   <section class="cs-section" id="s-visual">
@@ -899,9 +790,6 @@
     </div>
   </section>
 
-  <!-- ── Group: Result ── -->
-  <hr class="full-divider">
-  <div class="section-group-label">RESULT</div>
 
   <!-- AI collaboration -->
   <section class="cs-section" id="s-ai">
