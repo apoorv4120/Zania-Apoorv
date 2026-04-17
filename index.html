@@ -103,11 +103,8 @@ body{
   display:flex;align-items:center;justify-content:center;
 }
 .nav-logo-mark{
-  width:30px;height:30px;border-radius:8px;
-  background:var(--green-d);border:1px solid var(--green-r);
+  width:30px;height:30px;
   display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:700;color:var(--brand);
-  font-family:'IBM Plex Mono',monospace;
 }
 .nav-logo-text{
   font-size:14px;font-weight:700;color:#fff;letter-spacing:-.3px;
@@ -149,9 +146,16 @@ body{
 
 /* ── PHASE NAV ── */
 .phase-nav{
-  width:240px;background:var(--surface);border-right:1px solid var(--border);
+  width:280px;background:var(--panel);border-right:1px solid var(--border);
   display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;
+  position:relative;min-width:200px;max-width:420px;
 }
+.phase-nav-handle{
+  position:absolute;right:0;top:0;bottom:0;width:5px;
+  cursor:col-resize;z-index:10;
+  transition:background .12s;
+}
+.phase-nav-handle:hover,.phase-nav-handle.dragging{background:var(--brand);opacity:.35}
 .nav-section-label{
   padding:12px 14px 8px;font-size:9.5px;font-weight:600;
   letter-spacing:.08em;text-transform:uppercase;color:var(--t3);
@@ -185,12 +189,12 @@ body{
 /* Phase list */
 .phase-list{flex:1;padding:6px 0;overflow-y:auto}
 .phase-item{
-  display:flex;align-items:flex-start;gap:9px;
+  display:flex;align-items:center;gap:9px;
   padding:10px 14px;cursor:pointer;
   transition:background .1s;border-left:2px solid transparent;
 }
-.phase-item:hover{background:var(--panel)}
-.phase-item.active{background:var(--panel);border-left-color:var(--brand)}
+.phase-item:hover{background:var(--card)}
+.phase-item.active{background:var(--card);border-left-color:var(--brand)}
 .phase-item.active .pname{color:var(--t1)}
 .pstep{
   width:20px;height:20px;border-radius:50%;
@@ -200,12 +204,14 @@ body{
 }
 .pstep.done{background:var(--green-d);border:1px solid var(--green-r);color:var(--brand)}
 .pstep.warn{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.pstep.scanning{background:var(--amber-d);border:1px solid var(--amber-r);color:var(--amber)}
+.pstep.scanning svg{animation:spin .9s linear infinite;display:block}
 .pstep.bad{background:var(--red-d);border:1px solid var(--red-r);color:var(--red)}
 .pstep.wait{background:var(--blue-d);border:1px solid var(--blue-r);color:var(--blue)}
 .pstep.prog{background:var(--indigo-d);border:1px solid var(--indigo-r);color:var(--indigo)}
 .pinfo{flex:1;min-width:0}
 .pname{font-size:13px;font-weight:500;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.psub{font-size:11.5px;color:var(--t3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psub{font-size:11px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
 .psub.green{color:var(--brand)}.psub.amber{color:var(--amber)}.psub.red{color:var(--red)}
 .psub.blue{color:var(--blue)}.psub.indigo{color:var(--indigo)}
 
@@ -322,10 +328,11 @@ body{
 .bundle-sub{font-size:12px;color:var(--t3);margin-top:3px}
 .bundle-items{padding:6px 0}
 .bundle-item{
-  display:flex;align-items:center;gap:10px;
-  padding:11px 16px;border-bottom:1px solid var(--border-s);
+  display:flex;flex-direction:column;
+  border-bottom:1px solid var(--border-s);
   transition:background .12s;
 }
+.bi-row{display:flex;align-items:center;gap:10px;padding:11px 16px}
 .bundle-item:last-child{border-bottom:none}
 .bundle-item:hover{background:var(--card-h)}
 .bi-check{
@@ -344,11 +351,25 @@ body{
 .bi-sub{font-size:12px;color:var(--t3);margin-top:2px}
 .bi-edit{
   font-size:11px;font-weight:500;color:var(--t3);
-  cursor:pointer;padding:3px 8px;border-radius:4px;
-  border:1px solid transparent;transition:all .12s;
+  cursor:pointer;padding:3px 4px;
+  background:none;border:none;transition:color .12s;
   font-family:'IBM Plex Sans',sans-serif;
 }
-.bi-edit:hover{color:var(--t2);border-color:var(--border);background:var(--panel)}
+.bi-edit:hover{color:var(--brand);background:none}
+.bi-edit-panel{padding:12px 16px 14px;background:var(--bg);border-top:1px solid var(--border-s)}
+.bi-edit-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.bi-edit-textarea{width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--border);border-radius:5px;color:var(--t2);font-size:12.5px;font-family:'IBM Plex Sans',sans-serif;line-height:1.65;padding:10px 12px;resize:vertical;min-height:90px;outline:none;transition:border-color .12s}
+.bi-edit-textarea:focus{border-color:var(--brand)}
+.bi-edit-actions{display:flex;gap:8px;margin-top:10px}
+.btn-save-edit{padding:7px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;background:var(--brand);color:#000;border:none;transition:background .12s}
+.btn-save-edit:hover{background:#22C55E}
+.btn-reset-draft{padding:7px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;background:var(--card);color:var(--t2);border:1px solid var(--border);transition:all .12s}
+.btn-reset-draft:hover{border-color:var(--t3);color:var(--t1)}
+.bundle-card.minimized .bundle-items,.bundle-card.minimized #p4-requeue-section,
+.bundle-card.minimized .countdown-row,.bundle-card.minimized #email-toggle-btn,
+.bundle-card.minimized .email-preview{display:none}
+.bundle-sent-summary{display:none;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.bundle-card.minimized .bundle-sent-summary{display:flex}
 
 /* Countdown + Send CTA */
 .countdown-row{
@@ -491,21 +512,23 @@ body{
 
 /* ── NEW ASSESSMENT BUTTON ── */
 .new-assessment-btn{
-  display:flex;align-items:center;gap:7px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
   margin:0 8px 10px;
   padding:8px 10px;
   background:var(--brand);border:none;border-radius:6px;
   color:#000;font-size:12px;font-weight:700;
   cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
-  transition:background .15s;white-space:nowrap;overflow:hidden;
+  transition:background .15s;white-space:nowrap;
 }
+.primary-nav:hover .new-assessment-btn{justify-content:flex-start;}
 .new-assessment-btn:hover{background:#22C55E}
 .new-assessment-btn svg{flex-shrink:0;width:14px;height:14px}
 .new-assessment-label{
   opacity:0;transform:translateX(-6px);
   transition:opacity .15s .04s,transform .15s .04s;
-  white-space:nowrap;
+  white-space:nowrap;overflow:hidden;max-width:0;
 }
+.primary-nav:hover .new-assessment-label{max-width:200px;}
 .primary-nav:hover .new-assessment-label{opacity:1;transform:translateX(0)}
 
 /* ── ASSESSMENT ZONE (Layer 2 — lives right of primary nav) ── */
@@ -645,6 +668,16 @@ body{
 .brief-attn-item-name{font-size:13px;font-weight:500;color:var(--t1)}
 .brief-attn-item-desc{font-size:12px;color:var(--t3);margin-top:3px;line-height:1.55}
 .brief-attn-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--amber-r)}
+
+/* ── EVIDENCE SUMMARY (right panel on brief landing) ── */
+.esummary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.esummary-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px;transition:border-color .15s}
+.esummary-card:hover{border-color:var(--border)}
+.esummary-val{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:700;color:var(--t1);line-height:1;margin-bottom:6px}
+.esummary-val.green{color:var(--brand)}.esummary-val.blue{color:var(--blue)}.esummary-val.red{color:var(--red)}
+.esummary-key{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px}
+.esummary-sub{font-size:11px;color:var(--t3);line-height:1.5}
+.esummary-prompt{text-align:center;padding:20px;font-size:12px;color:var(--t4);border:1px dashed var(--border-s);border-radius:8px;margin-top:4px}
 
 /* ── GAP ANALYSIS ── */
 .gap-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border-s)}
@@ -879,7 +912,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
     <!-- Logo -->
     <div class="nav-logo-wrap">
       <div class="nav-logo">
-        <div class="nav-logo-mark">Z</div>
+        <div class="nav-logo-mark"><img src="Screenshots/logo.jpg" alt="Zania" width="28" height="28" style="object-fit:contain;display:block;"></div>
       </div>
       <span class="nav-logo-text">zan<em>ia</em></span>
     </div>
@@ -997,7 +1030,8 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
     <div class="assessment-body">
 
   <!-- PHASE NAV -->
-  <nav class="phase-nav" aria-label="Evidence collection phases">
+  <nav class="phase-nav" id="phase-nav" aria-label="Evidence collection phases">
+    <div class="phase-nav-handle" id="phase-nav-handle" title="Drag to resize"></div>
     <div class="nav-section-label">Evidence Collection</div>
     <div class="vendor-card">
       <div class="vendor-name">Twilio Inc. <span class="tier">TIER 2</span></div>
@@ -1010,36 +1044,49 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
       <div class="stat-cell" onclick="go(5)" tabindex="0" role="listitem button" aria-label="Round 2 of communication — click to view vendor communication"><div class="stat-val blue" aria-hidden="true">R2</div><div class="stat-key" aria-hidden="true">Round</div></div>
     </div>
 
-    <div class="nav-group-label">Overview</div>
-    <div class="phase-item active" id="pn-brief" onclick="go('brief')" tabindex="0" role="button" aria-current="true" aria-label="AI Briefing — Collection complete, start here">
-      <div class="pstep" style="background:var(--pos-bg);border:1px solid var(--pos-border)" aria-hidden="true"><div class="ai-dot" style="width:7px;height:7px;margin:0"></div></div>
-      <div class="pinfo"><div class="pname">AI Briefing</div><div class="psub green" aria-label="Collection complete, start here">Collection complete · start here</div></div>
-    </div>
-
-    <div class="nav-group-label" style="border-top:1px solid var(--border-s);margin-top:2px">Phases 1–6</div>
-    <div class="phase-list" role="list">
-      <div class="phase-item" id="pn0" onclick="go(0)" tabindex="0" role="listitem button" aria-label="Phase 1: External Security Scan — complete, 3 sources scanned" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+    <!-- Evidence phases -->
+    <div class="nav-group-label" style="border-top:1px solid var(--border-s);margin-top:2px;font-size:9px;letter-spacing:.07em;color:var(--t4)">EVIDENCE</div>
+    <div class="phase-list" role="list" id="evidence-phase-list" style="flex:0 0 auto;overflow:visible;padding-bottom:2px">
+      <div class="phase-item" id="pn0" onclick="go(0)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
         <div class="pstep done" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></div>
         <div class="pinfo"><div class="pname">1 · External Security Scan</div><div class="psub green">3 sources scanned</div></div>
       </div>
-      <div class="phase-item" id="pn1" onclick="go(1)" tabindex="0" role="listitem button" aria-label="Phase 2: Trust Center Discovery — complete, 5 collected, pen test via outreach" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+      <div class="phase-item" id="pn1" onclick="go(1)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
         <div class="pstep done" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></div>
         <div class="pinfo"><div class="pname">2 · Trust Center Discovery</div><div class="psub green">5 collected · pen test via outreach</div></div>
       </div>
-      <div class="phase-item" id="pn2" onclick="go(2)" tabindex="0" role="listitem button" aria-label="Phase 3: Public Registry and Screening — clear with 1 historical incident" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+      <div class="phase-item" id="pn2" onclick="go(2)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
         <div class="pstep done" aria-hidden="true"><i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i></div>
         <div class="pinfo"><div class="pname">3 · Public Registry & Screening</div><div class="psub amber">Clear · 1 historical incident</div></div>
       </div>
-      <div class="phase-item" id="pn3" onclick="go(3)" tabindex="0" role="listitem button" aria-label="Phase 4: Questionnaire Coverage — in progress, 76 percent, 44 remaining" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
-        <div class="pstep prog" aria-hidden="true"><i data-lucide="loader-2" style="width:11px;height:11px"></i></div>
+      <div class="phase-item" id="pn3" onclick="go(3)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s">
+        <div class="pstep prog" aria-hidden="true"><i data-lucide="list-checks" style="width:11px;height:11px;stroke-width:2.5"></i></div>
         <div class="pinfo"><div class="pname">4 · Questionnaire Coverage</div><div class="psub indigo">76% · 44 remaining</div></div>
       </div>
-      <div id="pn4" style="display:none"></div>
-      <div class="phase-item" id="pn5" onclick="go(5)" tabindex="0" role="listitem button" aria-label="Vendor Communication — 3 items need review" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .4s,transform .4s">
-        <div class="pstep bad" aria-hidden="true"><i data-lucide="mail" style="width:11px;height:11px;stroke-width:2"></i></div>
-        <div class="pinfo"><div class="pname">5 · Vendor Communication</div><div class="psub red" id="review-nav-sub">3 items need review</div></div>
+    </div>
+
+    <!-- Vendor Communication section -->
+    <div style="margin:6px 10px 4px;border-top:1px solid var(--border);padding-top:8px">
+      <div class="nav-group-label" style="font-size:9px;letter-spacing:.07em;color:var(--t4);margin:0 0 2px">VENDOR COMMUNICATION</div>
+    </div>
+    <div class="phase-list" role="list" id="vendor-phase-list" style="flex:0 0 auto;overflow:visible">
+      <div class="phase-item" id="pn4" onclick="go(4)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .35s,transform .35s;border-left-color:var(--amber);background:rgba(245,158,11,.03)">
+        <div class="pstep" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)"><i data-lucide="send" style="width:11px;height:11px;color:var(--amber);stroke-width:2"></i></div>
+        <div class="pinfo">
+          <div class="pname" style="font-weight:600">Vendor Outreach</div>
+          <div class="psub amber" id="pn4-sub">Draft · 5 items ready</div>
+        </div>
+        <span id="pn4-bundle-badge" style="display:none;font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace;padding:2px 5px;border-radius:3px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);color:var(--brand);flex-shrink:0;margin-left:4px"></span>
+      </div>
+      <div class="phase-item" id="pn5" onclick="go(5)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .4s,transform .4s;border-left-color:var(--amber);background:rgba(245,158,11,.03)">
+        <div class="pstep warn"><i data-lucide="inbox" style="width:11px;height:11px;stroke-width:2"></i></div>
+        <div class="pinfo">
+          <div class="pname" style="font-weight:600">Response Review</div>
+          <div class="psub amber" id="review-nav-sub">3 items need review</div>
+        </div>
       </div>
     </div>
+
   </nav>
 
   <!-- MAIN -->
@@ -1051,11 +1098,11 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
         <div class="ph-row">
           <div style="display:flex;align-items:center;gap:8px">
             <div class="ai-dot"></div>
-            <div class="ph-title">AI Briefing — Twilio Inc.</div>
+            <div class="ph-title">Evidence Summary — Twilio Inc.</div>
           </div>
           <span class="badge complete">COLLECTION COMPLETE</span>
         </div>
-        <div class="ph-desc">Here's what I did across all 6 evidence collection phases — and what needs your judgment before we proceed</div>
+        <div class="ph-desc">AI-driven collection completed across 5 phases in 4 days — 3 vendor responses need your review before risk assessment</div>
         <div class="ph-meta">
           <div class="ph-meta-item"><strong>7</strong> docs collected</div>
           <div class="ph-meta-item"><strong>142</strong>/186 questions filled</div>
@@ -1064,68 +1111,11 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
           <div class="ph-meta-item" style="color:var(--t3)">4 days elapsed · Mar 12–16</div>
         </div>
       </div>
-      <div class="pc">
-
-        <div class="slabel" style="margin-bottom:16px">What I did</div>
-        <div class="brief-timeline">
-
-          <div class="brief-step done" onclick="go(0)" tabindex="0" role="button" aria-label="Phase 1: External Security Scan — complete. Click to view scan results.">
-            <div class="brief-step-date">Mar 12, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
-            <div class="brief-step-title">1 · External Security Scan</div>
-            <div class="brief-step-text">Scanned BitSight (849), SecurityScorecard (91), and Shodan. No critical exposures — patching cadence flagged at B+ and noted for follow-up.</div>
-            <div class="brief-step-link" aria-hidden="true">Click to view scan results →</div>
-          </div>
-
-          <div class="brief-step done" onclick="go(1)" tabindex="0" role="button" aria-label="Phase 2: Trust Center Discovery — complete. Click to view collected documents.">
-            <div class="brief-step-date">Mar 12, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
-            <div class="brief-step-title">2 · Trust Center Discovery</div>
-            <div class="brief-step-text">Collected 5 docs from the trust center. Pen test required a mutual NDA — I flagged it, initiated outreach, and obtained the report after DocuSign sign-off.</div>
-            <div class="ai-judgment"><strong>I decided to:</strong> Automatically identify the NDA requirement from the trust center access error, add the pen test to the outreach queue, and draft the NDA request — without waiting for your instruction.</div>
-            <div class="brief-step-link" aria-hidden="true">Click to view collected documents →</div>
-          </div>
-
-          <div class="brief-step done" onclick="go(2)" tabindex="0" role="button" aria-label="Phase 3: Public Registry and Screening — complete. Click to view screening results.">
-            <div class="brief-step-date">Mar 12, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
-            <div class="brief-step-title">3 · Public Registry & Screening</div>
-            <div class="brief-step-text">All registries clear. One historical incident — Aug 2022 phishing attack, ~130 customers affected, fully remediated. No ongoing risk.</div>
-            <div class="brief-step-link" aria-hidden="true">Click to view screening results →</div>
-          </div>
-
-          <div class="brief-step done" onclick="go(3)" tabindex="0" role="button" aria-label="Phase 4: Questionnaire Coverage — complete. Click to view coverage by section.">
-            <div class="brief-step-date">Mar 13, 2025 <span class="badge complete" style="font-size:8px;padding:1px 5px">COMPLETE</span></div>
-            <div class="brief-step-title">4 · Questionnaire Coverage</div>
-            <div class="brief-step-text">142 of 186 questions (76%) auto-filled from collected evidence. Remaining 44 — spanning Business Continuity, HR Security, and 5 other sections — bundled for vendor outreach.</div>
-            <div class="brief-step-link" aria-hidden="true">Click to view coverage by section →</div>
-          </div>
-
-          <div class="brief-step done" onclick="go(4)" tabindex="0" role="button" aria-label="Phase 5: Vendor Outreach — sent. Click to view outreach bundle and email draft.">
-            <div class="brief-step-date">Mar 14, 2025 <span class="badge sent" style="font-size:8px;padding:1px 5px">SENT</span></div>
-            <div class="brief-step-title">5 · Vendor Outreach</div>
-            <div class="brief-step-text">Compiled 4 doc gaps + 44 questionnaire items into a single bundle and dispatched to security@twilio.com (Round 2). Auto-escalated after Round 1 SLA expired with the pen test still outstanding.</div>
-            <div class="ai-judgment"><strong>I decided to:</strong> Trigger Round 2 automatically when Round 1 responses didn't include a current pen test. I flagged it as a policy violation in the outreach message and set a shorter response window — without you needing to review Round 1 first.</div>
-            <div class="brief-step-link" aria-hidden="true">Click to view outreach bundle and email draft →</div>
-          </div>
-
-
+      <div class="pc" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <div style="flex:1;margin:0;border:1.5px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px">
+          <div style="font-size:14px;color:var(--t2);font-weight:500;margin-bottom:10px">Select a phase to explore</div>
+          <div style="font-size:12.5px;color:var(--t3);line-height:1.7;max-width:340px">Evidence collection is complete across all 5 phases. Choose any phase in the left panel to review what was gathered.</div>
         </div>
-
-        <div class="brief-attn-box" role="region" aria-label="Action needed">
-          <div class="brief-attn-title">
-            <i data-lucide="send" style="width:15px;height:15px;color:var(--ctn)" aria-hidden="true"></i> 1 action needed to continue
-          </div>
-          <div class="brief-attn-item" onclick="go(4)" tabindex="0" role="button" aria-label="Send vendor outreach bundle — click to review and send">
-            <span class="brief-attn-item-num" aria-hidden="true">01</span>
-            <div class="brief-attn-item-body">
-              <div class="brief-attn-item-name">Send vendor outreach bundle</div>
-              <div class="brief-attn-item-desc">5 items compiled — 4 doc requests + 44 questionnaire Qs. Review and dispatch to security@twilio.com.</div>
-            </div>
-          </div>
-          <div class="brief-attn-footer">
-            <div style="font-size:11px;color:var(--t3)">Vendor responses unlock Phase 6 · Response Review</div>
-            <button class="btn-proceed" onclick="go(4)">Review bundle →</button>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -1336,60 +1326,120 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
         <div class="ph-meta">
           <div class="ph-meta-item"><strong>5</strong> items compiled</div>
           <div class="ph-meta-item" style="color:var(--t3)">security@twilio.com</div>
-          <div class="ph-meta-item" style="color:var(--amber)">Round 2 · Response window: 14 days</div>
+          <div class="ph-meta-item" style="color:var(--amber)">Response window: 14 days</div>
         </div>
       </div>
       <div class="pc">
 
         <div class="bundle-card">
           <div class="bundle-header">
-            <div>
-              <div class="bundle-title">Vendor Follow-up Bundle</div>
-              <div class="bundle-sub">4 document requests + 1 questionnaire (44 Qs) → security@twilio.com · Round 2</div>
+            <div style="flex:1;min-width:0">
+              <div class="bundle-title">Vendor Outreach Bundle</div>
+              <div class="bundle-sub" id="p4-desc">4 document requests + 1 questionnaire (44 Qs) → security@twilio.com</div>
+              <div class="bundle-sent-summary" id="p4-sent-summary">
+                <i data-lucide="check-circle-2" style="width:13px;height:13px;color:var(--brand);flex-shrink:0"></i>
+                <span style="font-size:11.5px;color:var(--t3)">Sent <span style="font-family:'IBM Plex Mono',monospace;color:var(--t2)">Mar 17, 2025</span> · 5 items · security@twilio.com</span>
+                <button onclick="toggleBundleHistory()" style="font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;padding:0;margin-left:auto" id="p4-hist-btn">Show</button>
+              </div>
             </div>
-            <span class="badge draft">DRAFT</span>
+            <span class="badge draft" id="p4-badge">DRAFT</span>
           </div>
-          <div class="bundle-items">
+          <div class="bundle-items" id="p4-bundle-items">
             <div class="bundle-item">
-              <div class="bi-check" data-idx="0" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
-              <div class="bi-body">
-                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Penetration Test Report</div>
-                <div class="bi-sub">NDA-gated on twilio.com/en-us/trust-center — access requires signed mutual NDA</div>
+              <div class="bi-row">
+                <div class="bi-check" data-idx="0" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+                <div class="bi-body">
+                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Penetration Test Report <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-sub">NDA-gated on twilio.com/en-us/trust-center — access requires signed mutual NDA</div>
+                </div>
+                <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-0')">Edit</button>
               </div>
-              <button class="bi-edit">Edit</button>
+              <div class="bi-edit-panel" id="bi-panel-0" style="display:none">
+                <div class="bi-edit-label">Message to Vendor</div>
+                <textarea class="bi-edit-textarea" id="bi-ta-0">Please provide a current penetration test report (dated within the last 12 months). Your previous report from Q1 2024 falls outside our recency policy. Our NDA is already on file.</textarea>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn-save-edit" onclick="saveBundleEdit('bi-panel-0')">Save</button>
+                  <button class="btn-reset-draft" onclick="resetBundleEdit('bi-ta-0')">Reset to AI Draft</button>
+                </div>
+              </div>
             </div>
             <div class="bundle-item">
-              <div class="bi-check" data-idx="1" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
-              <div class="bi-body">
-                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>BC/DR Test Report</div>
-                <div class="bi-sub">BCP available but no DR test evidence found in trust center or SOC 2</div>
+              <div class="bi-row">
+                <div class="bi-check" data-idx="1" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+                <div class="bi-body">
+                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>BC/DR Test Report <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-sub">BCP available but no DR test evidence found in trust center or SOC 2</div>
+                </div>
+                <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-1')">Edit</button>
               </div>
-              <button class="bi-edit">Edit</button>
+              <div class="bi-edit-panel" id="bi-panel-1" style="display:none">
+                <div class="bi-edit-label">Message to Vendor</div>
+                <textarea class="bi-edit-textarea" id="bi-ta-1">Please provide your most recent Business Continuity and Disaster Recovery test results, including RTO/RPO measurements from the latest DR test exercise.</textarea>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn-save-edit" onclick="saveBundleEdit('bi-panel-1')">Save</button>
+                  <button class="btn-reset-draft" onclick="resetBundleEdit('bi-ta-1')">Reset to AI Draft</button>
+                </div>
+              </div>
             </div>
             <div class="bundle-item">
-              <div class="bi-check" data-idx="2" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
-              <div class="bi-body">
-                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Cyber Insurance Certificate</div>
-                <div class="bi-sub">Not available on twilio.com/en-us/trust-center or SEC filings</div>
+              <div class="bi-row">
+                <div class="bi-check" data-idx="2" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+                <div class="bi-body">
+                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Cyber Insurance Certificate <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-sub">Not available on twilio.com/en-us/trust-center or SEC filings</div>
+                </div>
+                <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-2')">Edit</button>
               </div>
-              <button class="bi-edit">Edit</button>
+              <div class="bi-edit-panel" id="bi-panel-2" style="display:none">
+                <div class="bi-edit-label">Message to Vendor</div>
+                <textarea class="bi-edit-textarea" id="bi-ta-2">Please provide your current cyber liability insurance certificate, including coverage amounts and policy effective dates.</textarea>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn-save-edit" onclick="saveBundleEdit('bi-panel-2')">Save</button>
+                  <button class="btn-reset-draft" onclick="resetBundleEdit('bi-ta-2')">Reset to AI Draft</button>
+                </div>
+              </div>
             </div>
             <div class="bundle-item">
-              <div class="bi-check" data-idx="3" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
-              <div class="bi-body">
-                <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Vulnerability Scan Results</div>
-                <div class="bi-sub">SOC 2 references quarterly scans but standalone report not provided</div>
+              <div class="bi-row">
+                <div class="bi-check" data-idx="3" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+                <div class="bi-body">
+                  <div class="bi-name"><span class="badge doc" style="margin-right:6px">DOC</span>Vulnerability Scan Results <span class="p5-rnd" style="margin-left:6px">R1</span></div>
+                  <div class="bi-sub">SOC 2 references quarterly scans but standalone report not provided</div>
+                </div>
+                <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-3')">Edit</button>
               </div>
-              <button class="bi-edit">Edit</button>
-            </div>
-            <div class="bundle-item">
-              <div class="bi-check" data-idx="4" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
-              <div class="bi-body">
-                <div class="bi-name"><span class="badge q" style="margin-right:6px">QUESTIONNAIRE</span>Questionnaire (44 remaining questions)</div>
-                <div class="bi-sub">76% auto-filled from SOC 2, trust center, and scans — 44 Qs need Twilio input</div>
+              <div class="bi-edit-panel" id="bi-panel-3" style="display:none">
+                <div class="bi-edit-label">Message to Vendor</div>
+                <textarea class="bi-edit-textarea" id="bi-ta-3">Please provide your most recent quarterly vulnerability scan report with a summary of findings and current remediation status.</textarea>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn-save-edit" onclick="saveBundleEdit('bi-panel-3')">Save</button>
+                  <button class="btn-reset-draft" onclick="resetBundleEdit('bi-ta-3')">Reset to AI Draft</button>
+                </div>
               </div>
-              <button class="bi-edit">Edit</button>
             </div>
+            <div class="bundle-item" style="border-bottom:none">
+              <div class="bi-row">
+                <div class="bi-check" data-idx="4" onclick="toggleBundleItem(this)" title="Toggle item"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>
+                <div class="bi-body">
+                  <div class="bi-name"><span class="badge q" style="margin-right:6px">QUESTIONNAIRE</span>Questionnaire (44 remaining questions)</div>
+                  <div class="bi-sub">76% auto-filled from SOC 2, trust center, and scans — 44 Qs need Twilio input</div>
+                </div>
+                <button class="bi-edit" onclick="toggleBundleEdit('bi-panel-4')">Edit</button>
+              </div>
+              <div class="bi-edit-panel" id="bi-panel-4" style="display:none">
+                <div class="bi-edit-label">Message to Vendor</div>
+                <textarea class="bi-edit-textarea" id="bi-ta-4">Please complete the attached questionnaire (44 questions). Sections requiring your input are highlighted — these could not be auto-filled from your trust center or SOC 2 documentation.</textarea>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn-save-edit" onclick="saveBundleEdit('bi-panel-4')">Save</button>
+                  <button class="btn-reset-draft" onclick="resetBundleEdit('bi-ta-4')">Reset to AI Draft</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Re-requested items added from Response Review -->
+          <div id="p4-requeue-section" style="display:none;border-top:1px solid var(--border-s);padding:8px 16px 4px">
+            <div style="font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--ctn);font-family:'IBM Plex Mono',monospace;margin-bottom:6px">RE-REQUESTED FROM REVIEW</div>
+            <div id="p4-requeue-items"></div>
           </div>
           <div class="countdown-row">
             <div class="countdown-label">Auto-sends if not sent manually in:</div>
@@ -1490,6 +1540,26 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
           </div>
         </div>
 
+        <!-- STATE D: re-request bundle, shown after initial bundle sent -->
+        <div id="p4-new-bundle-view" style="display:none">
+          <div class="bundle-card">
+            <div class="bundle-header">
+              <div>
+                <div class="bundle-title">Re-request Bundle</div>
+                <div class="bundle-sub">Items flagged from Response Review → security@twilio.com</div>
+              </div>
+              <span class="badge incomplete" style="font-size:9px">ROUND 3</span>
+            </div>
+            <div class="bundle-items" id="p4-new-bundle-items"></div>
+            <div style="padding:14px 16px;border-top:1px solid var(--border-s)">
+              <button class="btn-send-all" id="p4-nb-send-btn" onclick="sendNewBundle()">
+                <i data-lucide="send" style="width:15px;height:15px"></i>
+                <span id="p4-nb-send-label">Send Re-requests</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1501,9 +1571,9 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
           <span class="badge review" id="review-badge">3 AWAITING REVIEW</span>
         </div>
         <div class="ph-meta" style="margin-top:6px">
-          <div class="ph-meta-item" style="color:var(--red)"><strong id="review-count-meta">3</strong> awaiting your review</div>
-          <div class="ph-meta-item" style="color:var(--amber)"><strong>12</strong> pending vendor</div>
-          <div class="ph-meta-item" style="color:var(--brand)"><strong>4</strong> resolved</div>
+          <div class="ph-meta-item"><strong id="review-count-meta" style="color:var(--red)">3</strong> <span style="color:var(--t3)">awaiting your review</span></div>
+          <div class="ph-meta-item"><strong style="color:var(--amber)">12</strong> <span style="color:var(--t3)">pending vendor</span></div>
+          <div class="ph-meta-item"><strong style="color:var(--brand)">4</strong> <span style="color:var(--t3)">resolved</span></div>
           <div class="ph-meta-item" style="color:var(--t3)">19 total · security@twilio.com · Round 2</div>
         </div>
       </div>
@@ -1513,6 +1583,7 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
         <!-- LEFT: Query list -->
         <div style="width:272px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)">
 
+          <!-- OUTREACH SEND BANNER — collapses after sending -->
           <!-- Filter tabs -->
           <div class="p5-tabs">
             <button class="p5-tab active" id="tab-all" onclick="p5Filter('all')">All <span class="p5-cnt" id="tc-all">19</span></button>
@@ -1520,10 +1591,13 @@ This request was compiled and dispatched by Zania's autonomous TPRM agent on beh
             <button class="p5-tab" id="tab-pending" onclick="p5Filter('pending')">Awaiting <span class="p5-cnt" id="tc-pending">12</span></button>
             <button class="p5-tab" id="tab-done" onclick="p5Filter('done')">Resolved <span class="p5-cnt" id="tc-done" style="background:var(--green-d);color:var(--brand)">4</span></button>
           </div>
-          <!-- Bulk action bar (contextual) -->
-          <div class="p5-bulk" id="p5-bulk">
-            <span class="p5-bulk-label" id="p5-bulk-label"></span>
-            <button class="p5-bulk-btn" id="p5-bulk-btn" onclick="p5BulkAction()"></button>
+
+          <!-- Accept All AI Recommendations — always visible while review items exist -->
+          <div id="p5-accept-all" style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(74,222,128,.04);border-bottom:1px solid rgba(74,222,128,.15);flex-shrink:0">
+            <span style="font-size:10.5px;color:var(--t3);display:flex;align-items:center;gap:5px">
+              <i data-lucide="cpu" style="width:10px;height:10px;color:var(--brand)"></i> AI rec. for all 3 items
+            </span>
+            <button onclick="acceptAllAI()" style="font-size:10px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;padding:3px 9px;background:var(--green-d);border:1px solid var(--green-r);color:var(--brand);border-radius:4px;cursor:pointer;letter-spacing:.02em">Accept All</button>
           </div>
 
           <!-- Query list -->
@@ -1970,23 +2044,24 @@ let phase5Sent = false;
 
 // Phase navigation
 function go(idx) {
-  // Gate Phase 6 until Phase 5 is sent
-  if (idx === 5 && !phase5Sent) {
-    go(4); // redirect to outreach
-    return;
-  }
+  // Phase 4 merged into Vendor Communication (pn5 / pv4 or pv5)
+  // Phase 4 = Vendor Outreach, Phase 5 = Response Review — both are valid destinations
   document.querySelectorAll('.phase-view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.phase-item').forEach(p => {
     p.classList.remove('active');
     p.removeAttribute('aria-current');
   });
   let viewId, navId;
-  if (idx === 'brief') { viewId = 'pv-brief'; navId = 'pn-brief'; }
+  if (idx === 'brief') { viewId = 'pv-brief'; navId = null; }
   else if (idx === 'risk') { viewId = 'pv-risk'; navId = 'pn5'; updatePipelineForRisk(true); }
+  else if (idx === 5) { viewId = 'pv5'; navId = 'pn5'; updatePipelineForRisk(false); }
   else { viewId = 'pv' + idx; navId = 'pn' + idx; updatePipelineForRisk(false); }
   document.getElementById(viewId).classList.add('active');
-  const navEl = document.getElementById(navId);
+  const navEl = navId ? document.getElementById(navId) : null;
   if (navEl) { navEl.classList.add('active'); navEl.setAttribute('aria-current', 'true'); }
+  // Clear action highlights once visited
+  if (idx === 4) { const e = document.getElementById('pn4'); if (e) { e.style.borderLeftColor = 'transparent'; e.style.background = ''; } }
+  if (idx === 5) { const e = document.getElementById('pn5'); if (e) { e.style.borderLeftColor = 'transparent'; e.style.background = ''; } }
   const main = document.getElementById('main-content');
   if (main) main.focus();
 }
@@ -2007,10 +2082,6 @@ function updatePipelineForRisk(active) {
       steps[3].classList.remove('current'); steps[3].classList.add('locked');
     }
   }
-  const bar = document.getElementById('pipe-progress');
-  const lbl = document.getElementById('pipe-step-label');
-  if (bar) bar.style.width = active ? '57%' : '40%';
-  if (lbl) lbl.textContent = active ? 'Step 4 of 6' : 'Step 3 of 6';
 }
 
 // Expandable doc rows
@@ -2083,6 +2154,8 @@ function resolve(idx, action) {
   const listItem = document.getElementById('pi-' + idx);
   if (listItem) { listItem.classList.add('p5-done'); listItem.querySelector('.p5-dot').style.background = 'var(--brand)'; }
   lucide.createIcons();
+  updateStats(idx, action);
+  p5MoveToResolved(idx, action);
   updateProgress();
   undoTimers[idx] = setTimeout(() => {
     const u = label.querySelector('.resolved-undo');
@@ -2115,13 +2188,15 @@ function submitNote(idx) {
   const listItem2 = document.getElementById('pi-' + idx);
   if (listItem2) { listItem2.classList.add('p5-done'); listItem2.querySelector('.p5-dot').style.background = 'var(--brand)'; }
   lucide.createIcons();
+  updateStats(idx, 'accepted-note');
+  p5MoveToResolved(idx, 'accepted-note');
   updateProgress();
   undoTimers[idx] = setTimeout(() => { const u = label.querySelector('.resolved-undo'); if (u) u.remove(); }, 6000);
 }
 
 // Add to re-request queue
 function addToQueue(idx) {
-  if (resolved[idx]) return; // already resolved
+  if (resolved[idx]) return;
   requeuedItems.push(idx);
   resolved[idx] = 'requeued';
   const item = document.getElementById('rev-' + idx);
@@ -2129,43 +2204,143 @@ function addToQueue(idx) {
   const itemName = item.querySelector('.rev-name').childNodes[0].textContent.trim();
   label.innerHTML = `<span style="color:var(--t1);font-weight:500">${itemName}</span>` +
     `<span style="color:var(--t3);margin:0 5px">·</span>` +
-    `<span style="color:var(--ctn);font-weight:500">In re-request queue</span>` +
+    `<span style="color:var(--ctn);font-weight:500">Added to Vendor Outreach bundle</span>` +
     `<span class="resolved-undo" onclick="undoResolve(${idx})" style="font-size:10px;color:var(--t3);text-decoration:underline;cursor:pointer;margin-left:8px">Undo</span>`;
   item.classList.add('resolved');
   const listItem3 = document.getElementById('pi-' + idx);
   if (listItem3) { listItem3.classList.add('p5-done'); listItem3.querySelector('.p5-dot').style.background = 'var(--ctn)'; }
   lucide.createIcons();
-  // Add to queue bundle UI
-  const bundle = document.getElementById('requeue-bundle');
-  bundle.style.display = 'block';
-  const el = document.createElement('div');
-  el.className = 'queue-item';
-  el.id = 'qi-' + idx;
-  el.style.cssText = 'flex-direction:column;align-items:flex-start;gap:6px;padding:12px 16px';
-  const draft = requeueDrafts[idx] || '';
-  el.innerHTML =
-    `<div style="display:flex;align-items:center;gap:8px;width:100%">` +
-      `<i data-lucide="rotate-ccw" style="width:11px;height:11px;color:var(--ctn);flex-shrink:0"></i>` +
-      `<span style="flex:1;font-size:12.5px;font-weight:500;color:var(--t1)">${itemName}</span>` +
-      `<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--ctn-bg);border:1px solid var(--ctn-border);color:var(--ctn);font-family:'IBM Plex Mono',monospace" id="qbadge-${idx}">QUEUED</span>` +
-    `</div>` +
-    `<div style="font-size:11.5px;color:var(--t3);padding-left:19px;line-height:1.55">` +
-      `<span style="color:var(--t4);font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em">AI DRAFT</span> ` +
-      `${draft}` +
-    `</div>` +
-    `<div style="padding-left:19px">` +
-      `<a onclick="removeFromQueue(${idx})" style="font-size:10.5px;color:var(--t3);text-decoration:underline;cursor:pointer;font-family:'IBM Plex Sans',sans-serif" ` +
-        `onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t3)'">Remove from queue</a>` +
-    `</div>`;
-  document.getElementById('requeue-items').appendChild(el);
-  const n = requeuedItems.length;
-  const plural = n === 1 ? ' item' : ' items';
-  document.getElementById('requeue-count').textContent = n + plural;
-  document.getElementById('requeue-count-label').textContent = n + plural + ' queued for re-request';
-  document.getElementById('requeue-send-count').textContent = n;
-  lucide.createIcons();
+  updateStats(idx, 'requeued');
+  p5MoveToResolved(idx, 'requeued');
+
+  // Route item to Phase 4 bundle
+  addToBundleInPhase4(idx, itemName);
+  showToast(`"${itemName}" added to Vendor Outreach — <a onclick="go(4)" style="color:var(--brand);cursor:pointer;text-decoration:underline">Go to bundle →</a>`);
+
   updateProgress();
   undoTimers[idx] = setTimeout(() => { const u = label.querySelector('.resolved-undo'); if (u) u.remove(); }, 6000);
+}
+
+function buildBundleItemHTML(itemName, round, description, panelId) {
+  const badge = round === 'R3' ? `<span class="badge q" style="margin-right:6px">RE-REQUEST</span>` : `<span class="badge doc" style="margin-right:6px">DOC</span>`;
+  const taId = panelId ? panelId.replace('panel', 'ta') : '';
+  return `<div class="bi-row">` +
+    `<div class="bi-check"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></div>` +
+    `<div class="bi-body">` +
+      `<div class="bi-name">${badge}${itemName} <span class="p5-rnd" style="margin-left:6px">${round}</span></div>` +
+      `<div class="bi-sub">${description}</div>` +
+    `</div>` +
+    (panelId ? `<button class="bi-edit" onclick="toggleBundleEdit('${panelId}')">Edit</button>` : '') +
+  `</div>` +
+  (panelId ? `<div class="bi-edit-panel" id="${panelId}" style="display:none">` +
+    `<div class="bi-edit-label">Message to Vendor</div>` +
+    `<textarea class="bi-edit-textarea" id="${taId}">${description}</textarea>` +
+    `<div style="display:flex;gap:8px;margin-top:10px">` +
+      `<button class="btn-save-edit" onclick="saveBundleEdit('${panelId}')">Save</button>` +
+      `<button class="btn-reset-draft" onclick="resetBundleEdit('${taId}')">Reset to AI Draft</button>` +
+    `</div>` +
+  `</div>` : '');
+}
+
+function toggleBundleEdit(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  const btn = panel.previousElementSibling ? panel.previousElementSibling.querySelector('.bi-edit') : null;
+  if (btn) btn.style.color = open ? '' : 'var(--brand)';
+}
+
+function saveBundleEdit(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  panel.style.display = 'none';
+  const btn = panel.previousElementSibling ? panel.previousElementSibling.querySelector('.bi-edit') : null;
+  if (btn) btn.style.color = '';
+}
+
+function resetBundleEdit(taId) {
+  const ta = document.getElementById(taId);
+  if (!ta) return;
+  ta.value = ta.defaultValue;
+}
+
+function addToBundleInPhase4(idx, itemName) {
+  const draft = requeueDrafts[idx] || '';
+
+  if (!phase5Sent) {
+    // Pre-send: add to existing bundle's re-queue section
+    const section = document.getElementById('p4-requeue-section');
+    const container = document.getElementById('p4-requeue-items');
+    if (!section || !container) return;
+    section.style.display = 'block';
+    const panelIdPre = 'bi-rq-panel-' + idx;
+    const el = document.createElement('div');
+    el.className = 'bundle-item'; el.id = 'p4qi-' + idx;
+    el.innerHTML = buildBundleItemHTML(itemName, 'R2', draft, panelIdPre);
+    container.appendChild(el);
+    lucide.createIcons();
+    return;
+  }
+
+  // Post-send: show new standalone re-request bundle
+  const newView = document.getElementById('p4-new-bundle-view');
+  if (!newView) return;
+  newView.style.display = 'block';
+
+  const container = document.getElementById('p4-new-bundle-items');
+  if (!container) return;
+  const panelId = 'bi-nb-panel-' + idx;
+  const el = document.createElement('div');
+  el.className = 'bundle-item'; el.id = 'p4nbi-' + idx;
+  el.innerHTML = buildBundleItemHTML(itemName, 'R3', draft, panelId);
+  container.appendChild(el);
+  lucide.createIcons();
+
+  const count = container.querySelectorAll('.bundle-item').length;
+  const label = document.getElementById('p4-nb-send-label');
+  if (label) label.textContent = `Send Re-requests (${count})`;
+}
+
+function removeRequeueFromBundle(idx) {
+  const el = document.getElementById('p4qi-' + idx);
+  if (el) el.remove();
+  const qi = requeuedItems.indexOf(idx);
+  if (qi > -1) requeuedItems.splice(qi, 1);
+  if (document.getElementById('p4-requeue-items').children.length === 0) {
+    document.getElementById('p4-requeue-section').style.display = 'none';
+  }
+  updateBundleBadge();
+}
+
+function updateBundleBadge() {
+  const n = requeuedItems.length;
+  const badge = document.getElementById('pn4-bundle-badge');
+  if (!badge) return;
+  if (n > 0) {
+    badge.style.display = 'inline-block';
+    badge.textContent = `+${n}`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function showToast(html) {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--t2);font-family:\'IBM Plex Sans\',sans-serif;box-shadow:0 4px 24px rgba(0,0,0,.4);z-index:9999;opacity:0;transition:opacity .2s,transform .2s;pointer-events:auto;white-space:nowrap';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = html;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(10px)';
+  }, 4000);
 }
 
 function removeFromQueue(idx) {
@@ -2241,6 +2416,19 @@ function sendRequeueBundle() {
   }, 1800);
 }
 
+function sendNewBundle() {
+  const btn = document.getElementById('p4-nb-send-btn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-color:rgba(0,0,0,.3);border-top-color:#000;display:inline-block;border-width:2px;border-radius:50%;animation:spin .9s linear infinite;margin-right:6px;vertical-align:middle"></div>Sending…';
+  setTimeout(() => {
+    btn.innerHTML = '✓ Re-requests sent — Round 3 active';
+    btn.style.background = '#22C55E';
+    const badge = document.getElementById('p4-badge');
+    if (badge) { badge.textContent = 'SENT'; badge.className = 'badge sent'; }
+  }, 1800);
+}
+
 function toggleResolved(idx) {
   document.getElementById('rev-' + idx).classList.toggle('expanded');
 }
@@ -2307,7 +2495,14 @@ function updateProgress() {
     doneStep.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;stroke-width:3"></i>';
     lucide.createIcons();
     if (resolvedEl) resolvedEl.parentElement.innerHTML = 'All 3 items reviewed — <strong>ready to proceed</strong>';
+    // Hide pn5 unread dot — all reviewed
+    const dot5 = document.getElementById('pn5-dot');
+    if (dot5) dot5.style.display = 'none';
   }
+  // Update pn5 dot count with remaining review items
+  const remaining = 3 - count;
+  const dot5 = document.getElementById('pn5-dot');
+  if (dot5 && remaining > 0) { dot5.textContent = remaining; dot5.style.display = 'flex'; }
 }
 
 function showHandoff() {
@@ -2411,9 +2606,10 @@ function p5MoveToResolved(idx, action) {
 
     // Build new resolved item
     const newItem = document.createElement('div');
-    newItem.className = 'p5-item p5-done p5-item-entering';
+    const isRequeued = action === 'requeued';
+    newItem.className = (isRequeued ? 'p5-item' : 'p5-item p5-done') + ' p5-item-entering';
     newItem.id = 'pi-' + idx;
-    newItem.setAttribute('data-filter', 'done all');
+    newItem.setAttribute('data-filter', isRequeued ? 'pending all' : 'done all');
     newItem.setAttribute('tabindex', '0');
     newItem.onclick = () => p5Select(idx);
     newItem.innerHTML =
@@ -2424,10 +2620,10 @@ function p5MoveToResolved(idx, action) {
       `</div>` +
       `<div class="p5-arr">›</div>`;
 
-    // Insert at top of Resolved group (after group label)
-    const resolvedLbl = document.querySelector('#p5-list .p5-group-lbl[data-filter="done all"]');
-    if (resolvedLbl) {
-      resolvedLbl.insertAdjacentElement('afterend', newItem);
+    const targetSelector = isRequeued ? '#p5-list .p5-group-lbl[data-filter="pending all"]' : '#p5-list .p5-group-lbl[data-filter="done all"]';
+    const targetLbl = document.querySelector(targetSelector);
+    if (targetLbl) {
+      targetLbl.insertAdjacentElement('afterend', newItem);
     } else {
       document.getElementById('p5-list').appendChild(newItem);
     }
@@ -2490,6 +2686,7 @@ function p5Select(idx) {
 }
 
 function p5Filter(filter) {
+  currentFilter = filter;
   document.querySelectorAll('.p5-tab').forEach(t => t.classList.remove('active'));
   const tab = document.getElementById('tab-' + filter);
   if (tab) tab.classList.add('active');
@@ -2497,6 +2694,69 @@ function p5Filter(filter) {
     const filters = el.getAttribute('data-filter').split(' ');
     el.style.display = filters.includes(filter) ? '' : 'none';
   });
+  // Accept-all row: only relevant when viewing all/review items
+  const acceptAll = document.getElementById('p5-accept-all');
+  if (acceptAll && acceptAll.style.opacity !== '0') {
+    acceptAll.style.display = ['all', 'me'].includes(filter) ? 'flex' : 'none';
+  }
+  p5UpdateBulk();
+}
+
+// Inline send from inbox banner
+function sendFromInbox() {
+  const draft = document.getElementById('psb-draft');
+  const sending = document.getElementById('psb-sending');
+  const sent = document.getElementById('psb-sent');
+  const banner = document.getElementById('p5-send-banner');
+  draft.style.display = 'none';
+  sending.style.display = 'flex';
+
+  setTimeout(() => {
+    sending.style.display = 'none';
+    sent.style.display = 'flex';
+    phase5Sent = true;
+    // Turn banner green
+    banner.style.background = 'linear-gradient(to bottom,rgba(74,222,128,.06),rgba(74,222,128,.02))';
+    banner.style.borderBottomColor = 'rgba(74,222,128,.2)';
+    // Update nav subtitle
+    const sub = document.getElementById('review-nav-sub');
+    if (sub) { sub.textContent = '3 items need review'; sub.className = 'psub red'; }
+    // Collapse banner after showing confirmation
+    setTimeout(() => {
+      banner.style.maxHeight = '0';
+      banner.style.padding = '0';
+      banner.style.borderBottom = 'none';
+    }, 2200);
+  }, 2000);
+}
+
+// Accept all AI recommendations in bulk
+function acceptAllAI() {
+  const toAccept = [0, 1, 2].filter(i => !resolved[i]);
+  if (!toAccept.length) return;
+  const row = document.getElementById('p5-accept-all');
+  if (row) { row.style.opacity = '.4'; row.style.pointerEvents = 'none'; }
+  toAccept.forEach((idx, i) => {
+    setTimeout(() => {
+      p5Select(idx);
+      resolve(idx, 'accepted');
+      if (i === toAccept.length - 1) {
+        setTimeout(() => {
+          const r = document.getElementById('p5-accept-all');
+          if (r) { r.style.transition = 'opacity .3s,max-height .3s'; r.style.opacity = '0'; setTimeout(() => { r.style.maxHeight = '0'; r.style.padding = '0'; r.style.overflow = 'hidden'; }, 300); }
+        }, 400);
+      }
+    }, i * 350);
+  });
+}
+
+function toggleBundleHistory() {
+  const card = document.querySelector('#pv4 .bundle-card');
+  const btn = document.getElementById('p4-hist-btn');
+  if (!card) return;
+  const minimized = card.classList.contains('minimized');
+  card.classList.toggle('minimized', !minimized);
+  if (btn) btn.textContent = minimized ? 'Hide' : 'Show';
 }
 
 // Send bundle — 3-state flow: draft → sending → waiting → view responses
@@ -2510,11 +2770,24 @@ function sendBundle(mode) {
     document.getElementById('p4-sending').style.display = 'none';
     document.getElementById('p4-waiting').style.display = 'block';
     if (badge) { badge.textContent = 'SENT'; badge.className = 'badge sent'; }
+    // Minimize initial bundle card — becomes history row
+    const bundleCard = document.querySelector('#pv4 .bundle-card');
+    if (bundleCard) bundleCard.classList.add('minimized');
+    const histBtn = document.getElementById('p4-hist-btn');
+    if (histBtn) histBtn.textContent = 'Show';
     const desc = document.getElementById('p4-desc');
     if (desc) desc.textContent = 'Bundle dispatched to security@twilio.com — waiting for vendor response';
     const pn4sub = document.getElementById('pn4-sub');
     if (pn4sub) { pn4sub.textContent = 'Sent · Waiting on Twilio'; pn4sub.className = 'psub blue'; }
     phase5Sent = true;
+    // Hide pn4 unread dot — bundle sent
+    const dot4 = document.getElementById('pn4-dot');
+    if (dot4) dot4.style.display = 'none';
+    // Change pn4 icon to sent state + clear amber highlight
+    const pn4el = document.getElementById('pn4');
+    if (pn4el) { pn4el.style.borderLeftColor = 'transparent'; pn4el.style.background = ''; }
+    const pn4step = pn4el ? pn4el.querySelector('.pstep') : null;
+    if (pn4step) { pn4step.style.background = 'rgba(96,165,250,.1)'; pn4step.style.borderColor = 'rgba(96,165,250,.3)'; pn4step.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;color:var(--blue);stroke-width:3"></i>'; lucide.createIcons(); }
 
     // After 3.5s, reveal "View Responses" CTA + unlock Phase 6 nav
     setTimeout(() => {
@@ -2524,13 +2797,8 @@ function sendBundle(mode) {
       viewCta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       lucide.createIcons();
 
-      // Reveal Phase 6 nav item
-      const pn5 = document.getElementById('pn5');
-      pn5.style.display = 'flex';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        pn5.style.opacity = '1';
-        pn5.style.transform = 'none';
-      }));
+      // Transition to inbox (pv5) automatically after vendor "responds"
+      go(5); // phase5Sent is true now, so this shows pv5
     }, 3500);
   }, 2500);
 }
@@ -2678,43 +2946,70 @@ function confirmRisk() {
 // ── AI BRIEFING — steps animate in one by one, scanning → settled
 async function initBriefing() {
   document.getElementById('pv-brief').classList.add('active');
-  document.getElementById('pn-brief').classList.add('active');
-  document.getElementById('pn-brief').setAttribute('aria-current', 'true');
 
-  // Reveal nav items as each phase step completes (Phase 6 stays hidden until outreach sent)
-  const navIds = ['pn0', 'pn1', 'pn2', 'pn3', 'pn5'];
-  const steps = document.querySelectorAll('#pv-brief .brief-step');
+  const navIds = ['pn0', 'pn1', 'pn2', 'pn3', 'pn4', 'pn5'];
 
-  for (let i = 0; i < steps.length; i++) {
-    const step = steps[i];
+  for (let i = 0; i < navIds.length; i++) {
+    const navItem = document.getElementById(navIds[i]);
+    if (!navItem) { await wait(1170); continue; }
 
-    // Appear with scanning pulse on the timeline dot
-    step.classList.add('scanning', 'visible');
+    const pstep = navItem.querySelector('.pstep');
+    const savedHTML = pstep ? pstep.innerHTML : '';
+    const savedClass = pstep ? pstep.className : '';
 
-    await wait(850); // scanning duration
+    // Enter scanning state — show spinner before revealing final status
+    if (pstep) {
+      pstep.className = 'pstep scanning';
+      pstep.innerHTML = '<i data-lucide="loader-2" style="width:11px;height:11px;stroke-width:2"></i>';
+      lucide.createIcons();
+    }
+    navItem.style.display = 'flex';
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    navItem.style.opacity = '1';
+    navItem.style.transform = 'none';
 
-    // Settle — remove scanning, the step's own done/attn class takes over
-    step.classList.remove('scanning');
+    await wait(900); // scanning duration — analyst sees the work happening
 
-    // Reveal corresponding phase nav item
-    if (navIds[i]) {
-      const navItem = document.getElementById(navIds[i]);
-      if (navItem) {
-        navItem.style.display = 'flex';
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          navItem.style.opacity = '1';
-          navItem.style.transform = 'none';
-        }));
-      }
+    // Settle to final state
+    if (pstep) {
+      pstep.className = savedClass;
+      pstep.innerHTML = savedHTML;
+      lucide.createIcons();
     }
 
-    await wait(320);
+    await wait(280);
   }
 
-  // All steps loaded — reveal attention box
   await wait(300);
-  document.querySelector('#pv-brief .brief-attn-box').classList.add('visible');
+  // (attn box removed — vendor nav items carry their own status dots)
 }
+
+// Phase nav resize
+(function() {
+  const nav = document.getElementById('phase-nav');
+  const handle = document.getElementById('phase-nav-handle');
+  if (!nav || !handle) return;
+  let dragging = false, startX = 0, startW = 0;
+  handle.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX; startW = nav.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const w = Math.min(420, Math.max(200, startW + (e.clientX - startX)));
+    nav.style.width = w + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
 
 // Init
 initBriefing();
