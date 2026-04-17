@@ -23,7 +23,7 @@ body{
   --focus-ring:#4ADE80;
 
   /* ── SEMANTIC COLOR TOKENS (3 colors, each owns one meaning) ──
-     pos   = brand identity · complete status · primary action
+     pos   = complete status · accepted · resolved
      ctn   = needs analyst attention · decision pending · incomplete
      crit  = hard blocked · critical risk threshold exceeded         */
   --pos:#4ADE80;  --pos-bg:rgba(74,222,128,.07);  --pos-border:rgba(74,222,128,.15);
@@ -32,8 +32,8 @@ body{
   /* neutral-accent = workflow states with no urgency (sent · waiting · in-progress) */
   --neutral:#7E8EB0;--neutral-bg:rgba(126,142,176,.07);--neutral-border:rgba(126,142,176,.16);
 
-  /* ── BACKWARD-COMPAT ALIASES (keep all existing usages working) ── */
-  --brand:var(--pos);--brand-dim:var(--pos-bg);--brand-ring:var(--pos-border);
+  /* ── BRAND (separate from semantic green) ── */
+  --brand:#4ADE80;--brand-dim:rgba(74,222,128,.08);--brand-ring:rgba(74,222,128,.22);
   --green:var(--pos);--green-d:var(--pos-bg);--green-r:var(--pos-border);
   --amber:var(--ctn);--amber-d:var(--ctn-bg);--amber-r:var(--ctn-border);
   --red:var(--crit);--red-d:var(--crit-bg);--red-r:var(--crit-border);
@@ -895,16 +895,18 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
 /* ── P5 AI CHAT ── */
 .p5-ai-chat{
   flex-shrink:0;
+  margin:10px 12px 0;
   border-top:2px solid rgba(74,222,128,.3);
+  border-radius:10px 10px 0 0;
   background:var(--surface);display:flex;flex-direction:column;
   height:218px;transition:height .2s ease;
 }
-.p5-ai-chat.collapsed{height:36px}
+.p5-ai-chat.collapsed{height:46px}
 .p5-ai-chat.collapsed .p5-ai-msgs,.p5-ai-chat.collapsed .p5-ai-input-row{display:none}
 .p5-ai-chat.collapsed #p5-ai-chevron{transform:rotate(180deg)}
 .p5-ai-header{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-  padding:7px 14px;border-bottom:1px solid var(--border-s);
+  padding:18px 20px;border-bottom:1px solid var(--border-s);
   flex-shrink:0;
 }
 .p5-ai-header-left{display:flex;align-items:center;gap:7px}
@@ -984,7 +986,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
   </nav>
   <div class="tb-right">
     <div style="display:flex;align-items:center;gap:7px;padding:4px 10px 4px 6px;border-radius:20px;background:var(--card);border:1px solid var(--border);cursor:pointer">
-      <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace;flex-shrink:0">TW</div>
+      <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#4ADE80,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'IBM Plex Mono',monospace;flex-shrink:0">TW</div>
       <span style="font-size:12px;font-weight:500;color:var(--t1);font-family:'IBM Plex Sans',sans-serif">Twilio</span>
     </div>
   </div>
@@ -1165,6 +1167,7 @@ i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;fle
           <div class="psub amber" id="pn4-sub">Draft · 5 items ready</div>
         </div>
         <span id="pn4-bundle-badge" style="display:none;font-size:9px;font-weight:700;font-family:'IBM Plex Mono',monospace;padding:2px 5px;border-radius:3px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);color:var(--brand);flex-shrink:0;margin-left:4px"></span>
+        <span id="pn4-action-pill" style="font-size:9px;font-weight:600;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:100px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:var(--amber);flex-shrink:0;letter-spacing:0.04em;margin-left:auto">ACTION</span>
       </div>
       <div class="phase-item attn" id="pn5" onclick="go(5)" tabindex="0" role="listitem button" style="display:none;opacity:0;transform:translateY(3px);transition:opacity .4s,transform .4s">
         <div class="pstep warn"><i data-lucide="inbox" style="width:11px;height:11px;stroke-width:2"></i></div>
@@ -2164,7 +2167,7 @@ function go(idx) {
   else { viewId = 'pv' + idx; navId = 'pn' + idx; updatePipelineForRisk(false); }
   document.getElementById(viewId).classList.add('active');
   const navEl = navId ? document.getElementById(navId) : null;
-  if (navEl) { navEl.classList.add('active'); navEl.setAttribute('aria-current', 'true'); }
+  if (navEl) { navEl.classList.add('active'); navEl.setAttribute('aria-current', 'true'); navEl.classList.remove('attn'); }
   const main = document.getElementById('main-content');
   if (main) main.focus();
   // Update AI chat context for the active phase
@@ -2386,6 +2389,7 @@ function addToBundleInPhase4(idx, itemName) {
     el.innerHTML = buildBundleItemHTML(itemName, 'R2', draft, panelIdPre);
     container.appendChild(el);
     lucide.createIcons();
+    highlightPn4();
     return;
   }
 
@@ -2409,6 +2413,14 @@ function addToBundleInPhase4(idx, itemName) {
   const count = container.querySelectorAll('.bundle-item').length;
   const label = document.getElementById('p4-nb-send-label');
   if (label) label.textContent = `Send Re-requests (${count})`;
+  highlightPn4();
+}
+
+function highlightPn4() {
+  const pn4el = document.getElementById('pn4');
+  if (pn4el) pn4el.classList.add('attn');
+  const pill = document.getElementById('pn4-action-pill');
+  if (pill) pill.style.display = '';
 }
 
 function removeRequeueFromBundle(idx) {
@@ -2887,7 +2899,9 @@ function sendBundle(mode) {
     const dot4 = document.getElementById('pn4-dot');
     if (dot4) dot4.style.display = 'none';
     const pn4el = document.getElementById('pn4');
-    if (pn4el) { pn4el.style.borderLeftColor = 'transparent'; pn4el.style.background = ''; }
+    if (pn4el) { pn4el.classList.remove('attn'); pn4el.style.borderLeftColor = 'transparent'; pn4el.style.background = ''; }
+    const pill4 = document.getElementById('pn4-action-pill');
+    if (pill4) pill4.style.display = 'none';
 
     // After 3.5s, reveal "View Responses" CTA + unlock Phase 6 nav
     setTimeout(() => {
@@ -2896,6 +2910,7 @@ function sendBundle(mode) {
       viewCta.style.display = 'block';
       viewCta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       lucide.createIcons();
+      if (pn4sub) { pn4sub.textContent = 'Response received'; pn4sub.className = 'psub'; }
 
       // Transition to inbox (pv5) automatically after vendor "responds"
       go(5); // phase5Sent is true now, so this shows pv5
