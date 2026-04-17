@@ -2886,11 +2886,8 @@ function sendBundle(mode) {
     // Hide pn4 unread dot — bundle sent
     const dot4 = document.getElementById('pn4-dot');
     if (dot4) dot4.style.display = 'none';
-    // Change pn4 icon to sent state + clear amber highlight
     const pn4el = document.getElementById('pn4');
     if (pn4el) { pn4el.style.borderLeftColor = 'transparent'; pn4el.style.background = ''; }
-    const pn4step = pn4el ? pn4el.querySelector('.pstep') : null;
-    if (pn4step) { pn4step.style.background = 'rgba(96,165,250,.1)'; pn4step.style.borderColor = 'rgba(96,165,250,.3)'; pn4step.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;color:var(--blue);stroke-width:3"></i>'; lucide.createIcons(); }
 
     // After 3.5s, reveal "View Responses" CTA + unlock Phase 6 nav
     setTimeout(() => {
